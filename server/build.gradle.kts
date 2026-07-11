@@ -1,38 +1,42 @@
 plugins {
-    java
-    id("org.springframework.boot") version "4.1.0"
-    id("io.spring.dependency-management") version "1.1.7"
+    id("org.springframework.boot") version "4.1.0" apply false
+    id("io.spring.dependency-management") version "1.1.7" apply false
 }
 
-group = "com.orderflow"
-version = "0.0.1-SNAPSHOT"
-description = "server"
+allprojects {
+    group = "com.orderflow"
+    version = "0.0.1-SNAPSHOT"
 
-java {
-    toolchain {
-        languageVersion = JavaLanguageVersion.of(25)
+    repositories {
+        mavenCentral()
     }
 }
 
-repositories {
-    mavenCentral()
-}
+subprojects {
+    apply(plugin = "java-library")
+    apply(plugin = "io.spring.dependency-management")
 
-dependencies {
-    implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
-    implementation("org.springframework.boot:spring-boot-starter-webmvc")
-    compileOnly("org.projectlombok:lombok")
-    runtimeOnly("org.mariadb.jdbc:mariadb-java-client")
-    annotationProcessor("org.projectlombok:lombok")
-    testImplementation("org.springframework.boot:spring-boot-starter-data-jdbc-test")
-    testImplementation("org.springframework.boot:spring-boot-starter-data-jpa-test")
-    testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
-    testCompileOnly("org.projectlombok:lombok")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    testAnnotationProcessor("org.projectlombok:lombok")
-}
+    configure<JavaPluginExtension> {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(25)
+        }
+    }
 
-tasks.withType<Test> {
-    useJUnitPlatform()
+    configure<io.spring.gradle.dependencymanagement.dsl.DependencyManagementExtension> {
+        imports {
+            mavenBom(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES)
+        }
+    }
+
+    dependencies {
+        "compileOnly"("org.projectlombok:lombok")
+        "annotationProcessor"("org.projectlombok:lombok")
+        "testCompileOnly"("org.projectlombok:lombok")
+        "testAnnotationProcessor"("org.projectlombok:lombok")
+        "testRuntimeOnly"("org.junit.platform:junit-platform-launcher")
+    }
+
+    tasks.withType<Test> {
+        useJUnitPlatform()
+    }
 }

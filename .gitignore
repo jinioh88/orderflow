@@ -5,7 +5,12 @@
 # ============================================================
 
 # --- 기획/설계 문서 (비공개) ---
+# 루트 docs/ 및 모든 하위 프로젝트의 docs/ (server/docs 등) 전부 제외
 docs/
+
+# --- 학습 노트 (비공개) ---
+# 각 프로젝트의 study/ (server/study 등) 전부 제외
+study/
 
 # --- OS ---
 .DS_Store
@@ -19,6 +24,8 @@ Thumbs.db
 # --- Claude Code ---
 # 공유 설정(.claude/settings.json)은 추적, 개인 로컬 설정만 제외
 **/.claude/settings.local.json
+# 세션 역할 정의는 로컬 전용
+CLAUDE.md
 
 # --- 환경변수 / 시크릿 (전 프로젝트 공통 방어) ---
 .env

@@ -1,0 +1,16 @@
+package com.orderflow.api.support;
+
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
+
+/**
+ * 통합 테스트 베이스 — docker-compose의 MySQL(orderflow_test 전용 DB)·Redis를 재사용한다.
+ * 테스트 간 데이터 격리는 테스트 단위 트랜잭션 롤백으로 보장한다.
+ * 커밋이 실제로 일어나야 하는 테스트(동시성·락 등)는 이 클래스를 상속하지 말 것.
+ */
+@SpringBootTest
+@ActiveProfiles("test")
+@Transactional
+public abstract class IntegrationTest {
+}

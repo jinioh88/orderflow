@@ -1,0 +1,52 @@
+# OrderFlow 로컬 개발 환경 — MySQL 8 + Redis
+# 통합 테스트도 이 환경을 재사용한다 (orderflow: 로컬 실행용, orderflow_test: 테스트용)
+# 초기화 SQL은 호스트 바인드 마운트 대신 인라인 config로 주입한다
+# (Docker Desktop 파일 공유 설정과 무관하게 동작).
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: orderflow-mysql
+    ports:
+      # 호스트 기본 포트는 13306 — 다른 로컬 프로젝트의 3306 점유와 충돌 방지
+      - "${DB_PORT:-13306}:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root-local}
+      MYSQL_USER: ${DB_USERNAME:-orderflow}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-orderflow-local}
+      MYSQL_DATABASE: orderflow
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_0900_ai_ci
+    configs:
+      - source: mysql-init
+        target: /docker-entrypoint-initdb.d/01-create-test-db.sql
+    volumes:
+      - orderflow-mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD:-root-local}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7
+    container_name: orderflow-redis
+    ports:
+      # 호스트 기본 포트는 16379 — 다른 로컬 프로젝트의 6379 점유와 충돌 방지
+      - "${REDIS_PORT:-16379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+configs:
+  mysql-init:
+    content: |
+      -- 통합 테스트용 DB — 로컬 DB(orderflow)와 분리해 테스트가 개발 데이터를 건드리지 않게 한다
+      CREATE DATABASE IF NOT EXISTS orderflow_test CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+      GRANT ALL PRIVILEGES ON orderflow_test.* TO 'orderflow'@'%';
+      FLUSH PRIVILEGES;
+
+volumes:
+  orderflow-mysql-data:
