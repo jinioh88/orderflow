@@ -1,2 +1,33 @@
-# 기획/설계 문서 (비공개)
+# ============================================================
+# 루트 .gitignore — 횡단 관심사만 관리
+# 스택별 빌드 산출물은 각 프로젝트의 .gitignore가 담당:
+#   server/.gitignore (Gradle/IntelliJ), web/.gitignore (Next.js), app/.gitignore (Flutter)
+# ============================================================
+
+# --- 기획/설계 문서 (비공개) ---
 docs/
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+
+# --- IDE (루트 레벨) ---
+.idea/
+.vscode/
+*.iml
+
+# --- Claude Code ---
+# 공유 설정(.claude/settings.json)은 추적, 개인 로컬 설정만 제외
+**/.claude/settings.local.json
+
+# --- 환경변수 / 시크릿 (전 프로젝트 공통 방어) ---
+.env
+.env.*
+!.env.example
+*.pem
+**/application-secret.yml
+
+# --- 로그 / 임시 파일 ---
+*.log
+logs/
+tmp/
