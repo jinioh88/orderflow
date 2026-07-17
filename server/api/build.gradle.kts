@@ -6,6 +6,7 @@ plugins {
 dependencies {
     "implementation"(project(":infra"))
     "implementation"("org.springframework.boot:spring-boot-starter-webmvc")
+    "implementation"("org.springframework.boot:spring-boot-starter-validation")
     "testImplementation"("org.springframework.boot:spring-boot-starter-webmvc-test")
     "testImplementation"("org.springframework.boot:spring-boot-starter-data-jpa-test")
 }
