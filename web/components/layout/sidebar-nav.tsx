@@ -14,7 +14,7 @@ export function SidebarNav() {
   return (
     <nav className="flex flex-col gap-1 p-3">
       {MENU_ITEMS.map(({ href, label }) => {
-        const active = pathname.startsWith(href);
+        const active = pathname === href || pathname.startsWith(`${href}/`);
         return (
           <Link
             key={href}

@@ -1,3 +1,5 @@
+"use client";
+
 import { userMessageOf } from "@/lib/api/error-messages";
 
 export function ErrorMessage({

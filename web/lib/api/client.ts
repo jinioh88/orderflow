@@ -56,7 +56,9 @@ async function request<T>(
   path: string,
   options: RequestOptions = {},
 ): Promise<T> {
-  const { query, body, headers = {}, signal } = options;
+  const { query, body, signal } = options;
+  // 호출자가 넘긴 headers 객체를 변형하지 않도록 복사본에만 쓴다
+  const headers: Record<string, string> = { ...options.headers };
 
   const token = accessTokenProvider?.() ?? null;
   if (token) headers["Authorization"] = `Bearer ${token}`;
@@ -86,21 +88,15 @@ async function request<T>(
     );
   }
 
-  if (response.status === 204) return undefined as T;
-
-  let json: unknown;
-  try {
-    json = await response.json();
-  } catch {
-    throw new ApiError(
-      response.status,
-      CLIENT_ERROR_CODES.UNEXPECTED_RESPONSE,
-      "서버 응답을 해석할 수 없습니다.",
-    );
-  }
-
+  // 실패는 본문 파싱 성패와 무관하게 상태 코드 기준으로 처리한다
+  // (프록시가 비 JSON 401을 반환해도 unauthorizedHandler가 호출되도록)
   if (!response.ok) {
-    const errorBody = json as Partial<ApiErrorBody>;
+    let errorBody: Partial<ApiErrorBody> = {};
+    try {
+      errorBody = await response.json();
+    } catch {
+      // 비 JSON 오류 응답 — 공통 코드로 폴백
+    }
     const error = new ApiError(
       response.status,
       errorBody.error?.code ?? CLIENT_ERROR_CODES.UNEXPECTED_RESPONSE,
@@ -109,6 +105,24 @@ async function request<T>(
     );
     if (response.status === 401) unauthorizedHandler?.(error);
     throw error;
+  }
+
+  // 스펙상 본문 없는 성공은 204지만, 프록시가 본문을 제거한 2xx도 실패로 만들지 않는다
+  const text = await response.text();
+  if (response.status === 204 || text === "") return undefined as T;
+
+  let json: unknown;
+  try {
+    json = JSON.parse(text);
+  } catch {
+    json = null;
+  }
+  if (json === null || typeof json !== "object" || !("data" in json)) {
+    throw new ApiError(
+      response.status,
+      CLIENT_ERROR_CODES.UNEXPECTED_RESPONSE,
+      "서버 응답을 해석할 수 없습니다.",
+    );
   }
 
   return (json as ApiSuccessBody<T>).data;
