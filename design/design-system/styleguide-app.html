@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OrderFlow App 스타일가이드 — 5분 현장 도구</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+  :root{
+    --n0:#FFFFFF;--n50:#F8FAFC;--n100:#F1F5F9;--n200:#E2E8F0;--n300:#CBD5E1;--n400:#94A3B8;
+    --n500:#64748B;--n600:#475569;--n700:#334155;--n800:#1E293B;--n900:#0F172A;
+    --pri:#EA580C;--pri-strong:#C2410C;--pri-bg:#FFF7ED;
+    --success:#16A34A;--success-t:#15803D;--success-bg:#F0FDF4;
+    --warning:#D97706;--warning-t:#B45309;--warning-bg:#FFFBEB;
+    --danger:#DC2626;--danger-t:#B91C1C;--danger-bg:#FEF2F2;
+    --info-t:#1D4ED8;--info-bg:#EFF6FF;
+    --st-sub:#2563EB;--st-sub-t:#1D4ED8;--st-sub-bg:#EFF6FF;
+    --st-pen-t:#B45309;--st-pen-bg:#FFFBEB;--st-pen:#D97706;
+    --st-app:#16A34A;--st-app-t:#15803D;--st-app-bg:#F0FDF4;
+    --st-rej:#DC2626;--st-rej-t:#B91C1C;--st-rej-bg:#FEF2F2;
+    --st-shp:#7C3AED;--st-shp-t:#6D28D9;--st-shp-bg:#F5F3FF;
+    --st-rcv:#0D9488;--st-rcv-t:#0F766E;--st-rcv-bg:#F0FDFA;
+    --sh2:0 4px 12px rgba(15,23,42,.10);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Pretendard Variable',Pretendard,system-ui,-apple-system,'Apple SD Gothic Neo',sans-serif;
+    background:var(--n100);color:var(--n800);font-size:14px;line-height:20px;padding:40px}
+  h1{font-size:24px;font-weight:700;color:var(--n900)}
+  .sub{color:var(--n500);font-size:13px;margin:4px 0 32px}
+  section{background:var(--n0);border:1px solid var(--n200);border-radius:8px;padding:24px;margin-bottom:24px;max-width:1320px}
+  section>h2{font-size:16px;font-weight:600;margin-bottom:4px}
+  section>.desc{font-size:12px;color:var(--n500);margin-bottom:16px}
+  .row{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start}
+  .tab-num{font-variant-numeric:tabular-nums}
+  /* phone frame */
+  .phones{display:flex;gap:24px;flex-wrap:wrap}
+  .phone{width:320px;flex:none}
+  .phone .cap{font-size:12px;color:var(--n500);margin-bottom:8px;font-weight:600}
+  .frame{width:320px;height:600px;border:1px solid var(--n300);border-radius:24px;background:var(--n0);
+    overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--sh2)}
+  .abar{height:52px;display:flex;align-items:center;gap:10px;padding:0 16px;flex:none;
+    font-size:20px;font-weight:600;color:var(--n900)}
+  .abar .bk{font-size:16px;color:var(--n600)}
+  .body2{flex:1;overflow:hidden;padding:0 16px;display:flex;flex-direction:column;gap:12px}
+  .tabs{height:56px;border-top:1px solid var(--n200);display:flex;flex:none;background:var(--n0)}
+  .tabs div{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+    font-size:11px;font-weight:600;color:var(--n500)}
+  .tabs div.on{color:var(--pri)}
+  .tabs i{font-style:normal;font-size:18px;line-height:1}
+  /* atoms */
+  .cta{height:52px;border-radius:12px;background:var(--pri);color:#fff;font:inherit;font-size:16px;font-weight:600;
+    border:none;width:100%;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+  .btn2{height:48px;border-radius:12px;background:var(--pri);color:#fff;font:inherit;font-size:16px;font-weight:600;
+    border:none;padding:0 20px;cursor:pointer}
+  .btn2.sec{background:var(--n0);color:var(--n800);border:1px solid var(--n300)}
+  .btn2.txt{background:none;color:var(--pri-strong)}
+  .ctabar{padding:12px 16px;border-top:1px solid var(--n200);background:var(--n0);flex:none;box-shadow:0 -4px 12px rgba(15,23,42,.06)}
+  .banner2{display:flex;align-items:center;gap:8px;border-radius:12px;padding:12px 14px;font-size:14px;font-weight:500}
+  .banner2.warn{background:var(--warning-bg);color:var(--warning-t)}
+  .banner2.info{background:var(--info-bg);color:var(--info-t)}
+  .banner2.ok{background:var(--success-bg);color:var(--success-t)}
+  .offline{background:var(--n800);color:#fff;font-size:13px;padding:8px 16px;text-align:center;flex:none}
+  .card2{border:1px solid var(--n200);border-radius:16px;padding:16px;background:var(--n0)}
+  .cap2{font-size:14px;color:var(--n600)}
+  .bdg{display:inline-flex;align-items:center;gap:8px;border-radius:999px;font-weight:500}
+  .bdg.l{height:32px;padding:0 12px;font-size:16px;font-weight:600}
+  .bdg.m{height:24px;padding:0 10px;font-size:14px}
+  .bdg .dot{width:8px;height:8px;border-radius:999px;flex:none}
+  .minib{display:inline-flex;height:20px;padding:0 6px;border-radius:6px;font-size:11px;font-weight:600;
+    align-items:center;background:var(--warning-bg);color:var(--warning-t)}
+  /* stepper */
+  .step{display:flex;align-items:center;gap:4px}
+  .step button{width:44px;height:44px;border-radius:12px;border:1px solid var(--n300);background:var(--n0);
+    font-size:20px;color:var(--n700);cursor:pointer}
+  .step .v{width:56px;text-align:center;font-size:24px;font-weight:700;font-variant-numeric:tabular-nums}
+  .chips2{display:flex;gap:8px;overflow:hidden}
+  .chip2{height:36px;padding:0 14px;border-radius:999px;border:1px solid var(--n300);display:inline-flex;
+    align-items:center;font-size:14px;color:var(--n600);flex:none;background:var(--n0)}
+  .chip2.on{background:var(--pri-bg);border-color:var(--pri);color:var(--pri-strong);font-weight:600}
+  .prod{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--n100)}
+  .prod .nm{font-size:16px;font-weight:600;color:var(--n900)}
+  .prod .pr{font-size:14px;color:var(--n600);font-variant-numeric:tabular-nums}
+  .srch{height:44px;border-radius:12px;background:var(--n50);border:1px solid var(--n200);display:flex;
+    align-items:center;padding:0 14px;color:var(--n400);font-size:15px;flex:none}
+  /* timeline */
+  .tl{display:flex;flex-direction:column}
+  .tl .nd{display:flex;gap:12px}
+  .tl .rail{display:flex;flex-direction:column;align-items:center;width:16px;flex:none}
+  .tl .dot2{width:12px;height:12px;border-radius:999px;flex:none;margin-top:4px}
+  .tl .ln{width:2px;flex:1;background:var(--n200);min-height:24px}
+  .tl .tx{padding-bottom:20px}
+  .tl .st{font-size:16px;font-weight:600}
+  .tl .tm{font-size:14px;color:var(--n600);font-variant-numeric:tabular-nums}
+  /* scan (dark) */
+  .frame.dark{background:var(--n900)}
+  .frame.dark .abar{color:var(--n50)}
+  .vf{position:relative;height:200px;border-radius:16px;background:linear-gradient(160deg,#1c2536,#0F172A 70%);
+    display:flex;align-items:center;justify-content:center;flex:none}
+  .vf .fr{width:180px;height:110px;position:relative}
+  .vf .fr i{position:absolute;width:24px;height:24px;border:3px solid var(--success);border-radius:2px}
+  .vf .fr i:nth-child(1){top:0;left:0;border-right:none;border-bottom:none}
+  .vf .fr i:nth-child(2){top:0;right:0;border-left:none;border-bottom:none}
+  .vf .fr i:nth-child(3){bottom:0;left:0;border-right:none;border-top:none}
+  .vf .fr i:nth-child(4){bottom:0;right:0;border-left:none;border-top:none}
+  .sheet{background:#1E293B;border-radius:16px;padding:14px 16px;color:var(--n50)}
+  .sheet .nm{font-size:16px;font-weight:600}
+  .sheet .qty{font-size:14px;color:var(--n300);font-variant-numeric:tabular-nums}
+  .srow{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--n100);font-size:15px}
+  .srow .q{font-variant-numeric:tabular-nums;font-weight:600}
+  .seg{display:flex;border:1px solid var(--n300);border-radius:12px;overflow:hidden;height:44px}
+  .seg div{flex:1;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;color:var(--n600)}
+  .seg div.on{background:var(--pri-bg);color:var(--pri-strong)}
+  .ph{width:72px;height:72px;border-radius:12px;background:var(--n100);border:1px dashed var(--n300);
+    display:flex;align-items:center;justify-content:center;color:var(--n400);font-size:22px}
+  .note{font-size:12px;color:var(--n500);background:var(--n50);border:1px dashed var(--n300);border-radius:6px;padding:8px 12px;margin-top:16px}
+  .tprow{display:flex;align-items:baseline;gap:16px;padding:6px 0;border-bottom:1px dashed var(--n100)}
+  .tprow .tk{width:150px;font-size:12px;color:var(--n500);flex:none}
+</style>
+</head>
+<body>
+
+<h1>OrderFlow App 스타일가이드</h1>
+<p class="sub">「5분 현장 도구」 — 가맹점 점주(박점주) · 스펙: 04-app-components.md · 값의 SSOT: tokens.json · v1.0 (2026-07-19)</p>
+
+<!-- 1. 기초 -->
+<section>
+  <h2>1. 타이포 · 버튼 · 스테퍼 · 상태 뱃지</h2>
+  <p class="desc">본문 16 이상, 캡션도 14 미만 금지. 터치 타깃 48dp. 오렌지는 면(버튼·탭·칩)에만 — 뱃지·배너의 앰버와 역할 분리.</p>
+  <div class="tprow"><span class="tk">title 22/600</span><span style="font-size:22px;font-weight:600;color:var(--n900)">발주하기</span></div>
+  <div class="tprow"><span class="tk">heading 18/600</span><span style="font-size:18px;font-weight:600">자주 쓰는 발주</span></div>
+  <div class="tprow"><span class="tk">body 16/400 (기본)</span><span style="font-size:16px">콜드브루 원액 1L</span></div>
+  <div class="tprow"><span class="tk">caption 14/400</span><span style="font-size:14px;color:var(--n600)">₩12,000 / 박스 · 7월 19일(일)</span></div>
+  <div class="tprow"><span class="tk">num-xl 24/700 tab</span><span class="tab-num" style="font-size:24px;font-weight:700">₩1,240,000</span></div>
+  <div class="row" style="margin-top:16px;align-items:center">
+    <button class="btn2">템플릿 불러오기</button>
+    <button class="btn2 sec">취소</button>
+    <button class="btn2 txt">전체 보기</button>
+    <div class="step"><button>−</button><span class="v">12</span><button>+</button></div>
+  </div>
+  <div style="width:320px;margin-top:12px"><button class="cta">발주 제출 · ₩1,240,000</button></div>
+  <div class="row" style="gap:8px;margin-top:16px">
+    <span class="bdg l" style="background:var(--st-sub-bg);color:var(--st-sub-t)"><i class="dot" style="background:var(--st-sub)"></i>제출됨</span>
+    <span class="bdg l" style="background:var(--st-app-bg);color:var(--st-app-t)"><i class="dot" style="background:var(--st-app)"></i>승인됨</span>
+    <span class="bdg l" style="background:var(--st-shp-bg);color:var(--st-shp-t)"><i class="dot" style="background:var(--st-shp)"></i>출하됨</span>
+    <span class="bdg l" style="background:var(--st-rcv-bg);color:var(--st-rcv-t)"><i class="dot" style="background:var(--st-rcv)"></i>입고 완료</span>
+    <span class="bdg l" style="background:var(--n100);color:var(--n600)">⏱ 전송 대기</span>
+  </div>
+  <div class="note">'전송 대기'는 서버 상태가 아닌 로컬 상태 — dot 대신 아이콘으로 7상태 뱃지와 구분한다.</div>
+</section>
+
+<!-- 2. 화면 목업 -->
+<section>
+  <h2>2. 화면 목업</h2>
+  <p class="desc">폰 프레임은 비율 참고용(실기기 360~430dp). 아이콘은 이모지 대체 — 실제는 Material Symbols.</p>
+  <div class="phones">
+
+    <!-- 홈 -->
+    <div class="phone"><p class="cap">홈 — 마감 카운트다운 + 템플릿 + 진행 상태</p>
+      <div class="frame">
+        <div class="abar">한빛커피 강남1호점</div>
+        <div class="body2">
+          <div class="banner2 warn">⏰ 발주 마감까지 <b class="tab-num">29:59</b></div>
+          <div class="card2" style="background:var(--pri-bg);border-color:#FED7AA">
+            <div style="font-size:18px;font-weight:600">자주 쓰는 발주</div>
+            <div class="cap2" style="margin:4px 0 12px">주중 기본 세트 · 9품목 · 약 ₩380,000</div>
+            <button class="btn2" style="width:100%">1-Click 불러오기</button>
+          </div>
+          <div style="font-size:18px;font-weight:600;margin-top:4px">오늘 도착 예정</div>
+          <div class="card2">
+            <span class="bdg m" style="background:var(--st-shp-bg);color:var(--st-shp-t)"><i class="dot" style="background:var(--st-shp)"></i>출하됨</span>
+            <span style="font-size:14px;color:var(--n500)"> PO-260718-0388</span>
+            <div style="font-size:16px;font-weight:600;margin:8px 0 2px" class="tab-num">9품목 · ₩874,000</div>
+            <div class="cap2 tab-num" style="margin-bottom:12px">7월 19일(일) 도착 예정</div>
+            <button class="btn2 sec" style="width:100%;height:44px">📷 바코드 검수 시작 (M4)</button>
+          </div>
+        </div>
+        <div class="tabs"><div class="on"><i>🏠</i>홈</div><div><i>📋</i>발주</div><div><i>🧾</i>내역</div><div><i>☰</i>더보기</div></div>
+      </div>
+    </div>
+
+    <!-- 카탈로그 -->
+    <div class="phone"><p class="cap">발주 — 카탈로그 + 스테퍼 + 요약 바</p>
+      <div class="frame">
+        <div class="abar">발주하기</div>
+        <div class="body2">
+          <div class="srch">🔍 품목명 검색</div>
+          <div class="chips2">
+            <span class="chip2 on">전체</span><span class="chip2">원두·음료</span><span class="chip2">유제품</span><span class="chip2">포장재</span>
+          </div>
+          <div style="flex:1;overflow:hidden">
+            <div class="prod">
+              <div style="flex:1"><div class="nm">콜드브루 원액 1L</div><div class="pr">₩12,000 / 박스</div></div>
+              <div class="step"><button>−</button><span class="v" style="font-size:20px;width:40px">3</span><button>+</button></div>
+            </div>
+            <div class="prod">
+              <div style="flex:1"><div class="nm">시즌 한정 딸기 시럽 <span class="minib">한정 · 잔여 14</span></div><div class="pr">₩18,500 / EA</div></div>
+              <div class="step"><button>−</button><span class="v" style="font-size:20px;width:40px">2</span><button>+</button></div>
+            </div>
+            <div class="prod">
+              <div style="flex:1"><div class="nm">우유 1L (멸균)</div><div class="pr">₩28,000 / 박스</div></div>
+              <button class="btn2 sec" style="height:44px">담기</button>
+            </div>
+          </div>
+        </div>
+        <div class="ctabar"><button class="cta"><span class="tab-num">12품목 · ₩1,240,000</span> — 장바구니</button></div>
+        <div class="tabs"><div><i>🏠</i>홈</div><div class="on"><i>📋</i>발주</div><div><i>🧾</i>내역</div><div><i>☰</i>더보기</div></div>
+      </div>
+    </div>
+
+    <!-- 내역 + 타임라인 -->
+    <div class="phone"><p class="cap">내역 상세 — 상태 타임라인 (해당 발주 경로만)</p>
+      <div class="frame">
+        <div class="abar"><span class="bk">←</span> PO-260717-0311</div>
+        <div class="body2">
+          <div class="card2">
+            <span class="bdg l" style="background:var(--st-shp-bg);color:var(--st-shp-t)"><i class="dot" style="background:var(--st-shp)"></i>출하됨</span>
+            <div style="font-size:16px;font-weight:600;margin-top:10px" class="tab-num">7품목 · ₩1,240,000</div>
+            <div class="cap2 tab-num">7월 19일(일) 도착 예정</div>
+          </div>
+          <div class="tl" style="margin-top:8px">
+            <div class="nd"><div class="rail"><div class="dot2" style="background:var(--st-sub)"></div><div class="ln"></div></div>
+              <div class="tx"><div class="st">제출됨</div><div class="tm">07-17 21:40</div></div></div>
+            <div class="nd"><div class="rail"><div class="dot2" style="background:var(--st-app)"></div><div class="ln"></div></div>
+              <div class="tx"><div class="st">승인됨</div><div class="tm">07-18 12:00 · 자동 승인</div></div></div>
+            <div class="nd"><div class="rail"><div class="dot2" style="background:var(--st-shp);width:16px;height:16px"></div><div class="ln"></div></div>
+              <div class="tx"><div class="st" style="color:var(--st-shp-t)">출하됨 — 현재</div><div class="tm">07-18 15:10</div></div></div>
+            <div class="nd"><div class="rail"><div class="dot2" style="background:var(--n300)"></div></div>
+              <div class="tx"><div class="st" style="color:var(--n400)">입고 완료</div><div class="tm" style="color:var(--n400)">도착 후 스캔 검수</div></div></div>
+          </div>
+        </div>
+        <div class="tabs"><div><i>🏠</i>홈</div><div><i>📋</i>발주</div><div class="on"><i>🧾</i>내역</div><div><i>☰</i>더보기</div></div>
+      </div>
+    </div>
+
+    <!-- 스캔 (다크) -->
+    <div class="phone"><p class="cap">스캔 검수 — 유일한 다크 화면 (창고 환경)</p>
+      <div class="frame dark">
+        <div class="abar"><span class="bk" style="color:var(--n400)">←</span> 입고 검수 <span style="font-size:13px;font-weight:400;color:var(--n400)">SI-0412</span></div>
+        <div class="body2">
+          <div class="vf"><div class="fr"><i></i><i></i><i></i><i></i></div></div>
+          <div class="sheet">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div><div class="nm">✓ 콜드브루 원액 1L</div><div class="qty">검수 <b style="color:#4ADE80">8</b> / 출하 10</div></div>
+              <button class="btn2 sec" style="height:40px;font-size:14px;background:#334155;color:#fff;border-color:#475569">수정</button>
+            </div>
+          </div>
+          <div class="sheet" style="background:transparent;border:1px dashed #334155;color:var(--n400);font-size:13px">
+            인식: 성공 = 프레임 그린 플래시 + 진동 + 비프 (0.5초 이내) · 미등록 = 레드 플래시 + "이 출하 건에 없는 품목입니다"
+          </div>
+        </div>
+        <div class="ctabar" style="background:var(--n900);border-color:#1E293B;display:flex;gap:8px">
+          <button class="btn2 sec" style="flex:1;background:#1E293B;color:#fff;border-color:#334155">목록 보기</button>
+          <button class="cta" style="flex:1.4">검수 완료 — 불일치 1건</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 클레임 -->
+    <div class="phone"><p class="cap">클레임 등록 — 불일치 자동 초안 + 유형·사진</p>
+      <div class="frame">
+        <div class="abar"><span class="bk">←</span> 클레임 등록</div>
+        <div class="body2">
+          <div class="banner2 info" style="font-size:13px">ℹ 불일치분은 청구되지 않습니다 — 정산은 실제 입고 수량 기준입니다</div>
+          <div class="card2">
+            <div style="font-size:16px;font-weight:600">콜드브루 원액 1L</div>
+            <div class="cap2 tab-num" style="margin:2px 0 12px">출하 10 · 검수 8 · <b style="color:var(--danger-t)">불일치 2</b></div>
+            <div class="seg"><div class="on">파손</div><div>누락</div></div>
+            <div class="row" style="gap:8px;margin-top:12px">
+              <div class="ph">📷</div><div class="ph" style="background:var(--n200);border-style:solid">🖼</div>
+            </div>
+            <div class="cap2" style="font-size:13px;margin-top:8px;color:var(--n500)">파손은 사진을 첨부해 주세요 (최대 5장)</div>
+          </div>
+          <div class="banner2 info" style="font-size:13px">ℹ 불일치분은 청구되지 않습니다 — 정산은 실제 입고 수량 기준</div>
+        </div>
+        <div class="ctabar"><button class="cta">클레임 접수 · 입고 확정</button></div>
+      </div>
+    </div>
+
+    <!-- 오프라인 -->
+    <div class="phone"><p class="cap">오프라인 — 모드 배너 + 전송 대기 카드 + 복구 후 안심 배너</p>
+      <div class="frame">
+        <div class="offline">오프라인 — 발주는 저장 후 연결되면 자동 전송됩니다</div>
+        <div class="abar">발주 내역</div>
+        <div class="body2">
+          <div class="card2">
+            <span class="bdg m" style="background:var(--n100);color:var(--n600)">⏱ 전송 대기</span>
+            <div style="font-size:16px;font-weight:600;margin-top:8px" class="tab-num">5품목 · ₩312,000</div>
+            <div class="cap2 tab-num">07-19 23:41 저장됨 · 연결 시 자동 전송</div>
+          </div>
+          <div class="banner2 ok" style="font-size:13px">✓ 네트워크 복구 — 보류 중이던 발주 2건이 전송되었습니다 (12:05) <span style="margin-left:auto;font-weight:600">✕</span></div>
+          <div class="card2">
+            <span class="bdg m" style="background:var(--st-rcv-bg);color:var(--st-rcv-t)"><i class="dot" style="background:var(--st-rcv)"></i>입고 완료</span>
+            <div style="font-size:16px;font-weight:600;margin-top:8px" class="tab-num">9품목 · ₩874,000</div>
+            <div class="cap2 tab-num">07-18 입고 확정</div>
+          </div>
+          <div class="banner2 info" style="font-size:13px">ℹ 마감(12:00) 이후 전송되면 익영업일 마감분으로 접수됩니다</div>
+        </div>
+        <div class="tabs"><div><i>🏠</i>홈</div><div><i>📋</i>발주</div><div class="on"><i>🧾</i>내역</div><div><i>☰</i>더보기</div></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<p style="font-size:12px;color:var(--n400);max-width:1320px">OrderFlow Design System v1.0 — 이 파일은 시각 레퍼런스다. 구현 값은 tokens.json, 동작 규칙은 02-patterns.md·04-app-components.md를 따른다.</p>
+
+</body>
+</html>

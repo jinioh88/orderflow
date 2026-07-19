@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OrderFlow Web 스타일가이드 — 관제탑</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+  :root{
+    /* core.neutral */
+    --n0:#FFFFFF;--n50:#F8FAFC;--n100:#F1F5F9;--n200:#E2E8F0;--n300:#CBD5E1;
+    --n400:#94A3B8;--n500:#64748B;--n600:#475569;--n700:#334155;--n800:#1E293B;--n900:#0F172A;
+    /* web brand */
+    --primary:#2563EB;--primary-hover:#1D4ED8;--primary-bg:#EFF6FF;
+    /* semantic feedback */
+    --success:#16A34A;--success-t:#15803D;--success-bg:#F0FDF4;
+    --warning:#D97706;--warning-t:#B45309;--warning-bg:#FFFBEB;
+    --danger:#DC2626;--danger-t:#B91C1C;--danger-bg:#FEF2F2;
+    --info:#2563EB;--info-t:#1D4ED8;--info-bg:#EFF6FF;
+    /* order status */
+    --st-sub:#2563EB;--st-sub-t:#1D4ED8;--st-sub-bg:#EFF6FF;
+    --st-pen:#D97706;--st-pen-t:#B45309;--st-pen-bg:#FFFBEB;
+    --st-app:#16A34A;--st-app-t:#15803D;--st-app-bg:#F0FDF4;
+    --st-rej:#DC2626;--st-rej-t:#B91C1C;--st-rej-bg:#FEF2F2;
+    --st-shp:#7C3AED;--st-shp-t:#6D28D9;--st-shp-bg:#F5F3FF;
+    --st-rcv:#0D9488;--st-rcv-t:#0F766E;--st-rcv-bg:#F0FDFA;
+    --st-can:#94A3B8;--st-can-t:#475569;--st-can-bg:#F1F5F9;
+    /* aging ramp */
+    --age1:#FDE68A;--age2:#F59E0B;--age3:#B45309;--age4:#78350F;
+    --sh1:0 1px 2px rgba(15,23,42,.06);--sh2:0 4px 12px rgba(15,23,42,.10);--sh3:0 12px 32px rgba(15,23,42,.16);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Pretendard Variable',Pretendard,system-ui,-apple-system,'Apple SD Gothic Neo',sans-serif;
+    background:var(--n50);color:var(--n700);font-size:13px;line-height:20px;padding:40px;}
+  .num{font-variant-numeric:tabular-nums;text-align:right}
+  h1{font-size:24px;line-height:32px;font-weight:700;color:var(--n900)}
+  .sub{color:var(--n500);font-size:13px;margin:4px 0 32px}
+  section{background:var(--n0);border:1px solid var(--n200);border-radius:8px;padding:24px;margin-bottom:24px;max-width:1080px}
+  section>h2{font-size:16px;line-height:24px;font-weight:600;color:var(--n800);margin-bottom:4px}
+  section>.desc{font-size:12px;color:var(--n500);margin-bottom:16px}
+  .row{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start}
+  .lbl{font-size:12px;line-height:16px;color:var(--n500);margin-bottom:6px;font-weight:500}
+  /* swatches */
+  .sw{width:76px}.sw .chip{height:40px;border-radius:4px;border:1px solid rgba(15,23,42,.08)}
+  .sw .nm{font-size:11px;color:var(--n700);margin-top:4px}.sw .hx{font-size:11px;color:var(--n400);font-variant-numeric:tabular-nums}
+  /* type */
+  .tprow{display:flex;align-items:baseline;gap:16px;padding:6px 0;border-bottom:1px dashed var(--n100)}
+  .tprow .tk{width:140px;font-size:12px;color:var(--n500);flex:none}
+  /* buttons */
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:32px;padding:0 12px;
+    border-radius:6px;border:1px solid transparent;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+  .btn.pri{background:var(--primary);color:#fff}.btn.pri:hover{background:var(--primary-hover)}
+  .btn.sec{background:var(--n0);border-color:var(--n300);color:var(--n700)}.btn.sec:hover{background:var(--n50)}
+  .btn.gho{background:transparent;color:var(--n700)}.btn.gho:hover{background:var(--n100)}
+  .btn.dan{background:var(--danger);color:#fff}
+  .btn.dgh{background:transparent;color:var(--danger-t)}.btn.dgh:hover{background:var(--danger-bg)}
+  .btn.sm{height:28px;padding:0 8px;font-size:12px}.btn.lg{height:36px;padding:0 16px}
+  .btn:disabled{background:var(--n100);color:var(--n400);border-color:transparent;cursor:not-allowed}
+  /* inputs */
+  .inp{height:32px;padding:0 10px;border:1px solid var(--n300);border-radius:4px;font:inherit;font-size:14px;
+    color:var(--n800);background:var(--n0);width:220px}
+  .inp::placeholder{color:var(--n400)}
+  .inp:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,99,235,.15)}
+  .inp.err{border-color:var(--danger)}.inp.err:focus{box-shadow:0 0 0 3px rgba(220,38,38,.15)}
+  .errmsg{font-size:12px;color:var(--danger-t);margin-top:4px}
+  .suffix{position:relative;display:inline-block}
+  .suffix .inp{padding-right:36px;text-align:right;font-variant-numeric:tabular-nums}
+  .suffix::after{content:attr(data-unit);position:absolute;right:10px;top:50%;transform:translateY(-50%);
+    font-size:13px;color:var(--n500)}
+  .chip{display:inline-flex;align-items:center;height:28px;padding:0 12px;border-radius:999px;border:1px solid var(--n300);
+    font-size:12px;color:var(--n600);cursor:pointer;background:var(--n0)}
+  .chip.on{background:var(--primary-bg);border-color:var(--primary);color:var(--primary-hover);font-weight:600}
+  /* badges */
+  .bdg{display:inline-flex;align-items:center;gap:6px;border-radius:999px;font-weight:500}
+  .bdg.s{height:20px;padding:0 8px;font-size:12px}
+  .bdg.m{height:24px;padding:0 10px;font-size:13px}
+  .bdg .dot{width:6px;height:6px;border-radius:999px;flex:none}
+  /* table (AG-Grid look) */
+  table.grid{border-collapse:collapse;width:100%;font-size:13px}
+  .grid th{height:32px;background:var(--n50);border-bottom:1px solid var(--n300);font-size:12px;font-weight:500;
+    color:var(--n500);text-align:left;padding:0 12px}
+  .grid td{height:36px;border-bottom:1px solid var(--n200);padding:0 12px;color:var(--n700)}
+  .grid tr:hover td{background:var(--n50)}
+  .grid tr.sel td{background:var(--primary-bg)}
+  .grid .r{text-align:right;font-variant-numeric:tabular-nums}
+  .grid .dt{color:var(--n500);font-size:12px}
+  .fbar{display:flex;align-items:center;gap:8px;height:48px}
+  .fbar .grow{flex:1}
+  .cnt{font-size:12px;color:var(--n500);font-variant-numeric:tabular-nums}
+  /* KPI */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+  .kpi{border:1px solid var(--n200);border-radius:8px;padding:16px;background:var(--n0);box-shadow:var(--sh1)}
+  .kpi .k{font-size:12px;color:var(--n500)}
+  .kpi .v{font-size:24px;line-height:32px;font-weight:700;color:var(--n800);font-variant-numeric:tabular-nums;margin-top:4px}
+  .kpi .d{font-size:12px;color:var(--n500);margin-top:2px;font-variant-numeric:tabular-nums}
+  .kpi.warn .v{color:var(--warning-t)}
+  /* aging */
+  .age-legend{display:flex;gap:16px;font-size:12px;color:var(--n600);margin-bottom:12px}
+  .age-legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+  .agrow{display:grid;grid-template-columns:96px 1fr repeat(5,90px);gap:0 12px;align-items:center;
+    padding:7px 0;border-bottom:1px dashed var(--n100);font-size:13px}
+  .agrow .bar{display:flex;gap:2px;height:12px}
+  .agrow .bar i{border-radius:2px}
+  .agrow .v{text-align:right;font-variant-numeric:tabular-nums;color:var(--n700)}
+  .agrow .tot{font-weight:600;color:var(--n800)}
+  .aghead{font-size:12px;color:var(--n500);border-bottom:1px solid var(--n300);padding-bottom:6px}
+  .ddot{display:inline-block;width:6px;height:6px;border-radius:999px;background:var(--danger);margin-right:4px}
+  /* modal */
+  .modal{width:400px;background:var(--n0);border-radius:8px;box-shadow:var(--sh3);border:1px solid var(--n200)}
+  .modal .hd{display:flex;justify-content:space-between;align-items:center;padding:16px 24px;border-bottom:1px solid var(--n200);
+    font-size:16px;font-weight:600;color:var(--n800)}
+  .modal .bd{padding:24px}
+  .modal .ft{display:flex;justify-content:flex-end;gap:8px;padding:16px 24px;border-top:1px solid var(--n200)}
+  .modal .x{color:var(--n400);cursor:pointer;font-size:16px}
+  textarea.inp{height:auto;width:100%;padding:8px 10px;resize:vertical;line-height:20px}
+  /* toast & banner */
+  .toast{display:flex;align-items:center;gap:10px;width:360px;background:var(--n0);border:1px solid var(--n200);
+    border-radius:8px;box-shadow:var(--sh2);padding:12px 14px;position:relative;overflow:hidden;font-size:13px}
+  .toast::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px}
+  .toast.ok::before{background:var(--success)}.toast.ng::before{background:var(--danger)}
+  .toast .a{margin-left:auto;color:var(--primary);font-weight:600;cursor:pointer;flex:none}
+  .banner{display:flex;align-items:center;gap:8px;border-radius:6px;padding:10px 14px;font-size:13px}
+  .banner.info{background:var(--info-bg);color:var(--info-t)}
+  .banner.warn{background:var(--warning-bg);color:var(--warning-t)}
+  .banner.dang{background:var(--danger-bg);color:var(--danger-t)}
+  /* shell preview */
+  .shell{display:flex;border:1px solid var(--n200);border-radius:8px;overflow:hidden;height:320px;background:var(--n50)}
+  .shell .side{width:200px;background:var(--n0);border-right:1px solid var(--n200);flex:none;display:flex;flex-direction:column}
+  .shell .logo{height:44px;display:flex;align-items:center;padding:0 16px;font-weight:700;color:var(--n900);
+    border-bottom:1px solid var(--n100);font-size:13px}
+  .shell .mi{height:32px;display:flex;align-items:center;gap:8px;padding:0 12px;margin:1px 8px;border-radius:6px;
+    font-size:12px;font-weight:600;color:var(--n600)}
+  .shell .mi.on{background:var(--primary-bg);color:var(--primary);box-shadow:inset 3px 0 0 var(--primary)}
+  .shell .mi:hover:not(.on){background:var(--n100)}
+  .shell .main{flex:1;display:flex;flex-direction:column}
+  .shell .hd2{height:44px;background:var(--n0);border-bottom:1px solid var(--n200);display:flex;align-items:center;
+    justify-content:space-between;padding:0 16px;font-size:15px;font-weight:600;color:var(--n900)}
+  .shell .usr{font-size:11px;color:var(--n500);font-weight:400}
+  .shell .cnt2{padding:16px;color:var(--n400);font-size:12px}
+  .note{font-size:12px;color:var(--n500);background:var(--n50);border:1px dashed var(--n300);border-radius:6px;
+    padding:8px 12px;margin-top:12px}
+  .sk{background:linear-gradient(90deg,var(--n100) 25%,var(--n50) 50%,var(--n100) 75%);background-size:200% 100%;
+    animation:sh 1.5s infinite;border-radius:4px;height:14px}
+  @keyframes sh{from{background-position:200% 0}to{background-position:-200% 0}}
+</style>
+</head>
+<body>
+
+<h1>OrderFlow Web 스타일가이드</h1>
+<p class="sub">「관제탑」 — 본사 관리자(김운영) · 스펙: 03-web-components.md · 값의 SSOT: tokens.json · v1.0 (2026-07-19)</p>
+
+<!-- 1. 컬러 -->
+<section>
+  <h2>1. 컬러</h2>
+  <p class="desc">core 팔레트는 직접 사용 금지 — 화면 코드는 semantic/web 토큰만 참조한다.</p>
+  <p class="lbl">중립 스케일</p>
+  <div class="row" style="gap:8px">
+    <div class="sw"><div class="chip" style="background:#F8FAFC"></div><div class="nm">50</div><div class="hx">#F8FAFC</div></div>
+    <div class="sw"><div class="chip" style="background:#F1F5F9"></div><div class="nm">100</div><div class="hx">#F1F5F9</div></div>
+    <div class="sw"><div class="chip" style="background:#E2E8F0"></div><div class="nm">200 보더</div><div class="hx">#E2E8F0</div></div>
+    <div class="sw"><div class="chip" style="background:#CBD5E1"></div><div class="nm">300</div><div class="hx">#CBD5E1</div></div>
+    <div class="sw"><div class="chip" style="background:#94A3B8"></div><div class="nm">400 비활성</div><div class="hx">#94A3B8</div></div>
+    <div class="sw"><div class="chip" style="background:#64748B"></div><div class="nm">500 캡션</div><div class="hx">#64748B</div></div>
+    <div class="sw"><div class="chip" style="background:#334155"></div><div class="nm">700 본문</div><div class="hx">#334155</div></div>
+    <div class="sw"><div class="chip" style="background:#1E293B"></div><div class="nm">800 제목</div><div class="hx">#1E293B</div></div>
+    <div class="sw"><div class="chip" style="background:#0F172A"></div><div class="nm">900</div><div class="hx">#0F172A</div></div>
+  </div>
+  <p class="lbl" style="margin-top:16px">브랜드 (Web) · 시맨틱</p>
+  <div class="row" style="gap:8px">
+    <div class="sw"><div class="chip" style="background:#2563EB"></div><div class="nm">primary</div><div class="hx">#2563EB</div></div>
+    <div class="sw"><div class="chip" style="background:#1D4ED8"></div><div class="nm">hover</div><div class="hx">#1D4ED8</div></div>
+    <div class="sw"><div class="chip" style="background:#EFF6FF"></div><div class="nm">primary-bg</div><div class="hx">#EFF6FF</div></div>
+    <div class="sw"><div class="chip" style="background:#16A34A"></div><div class="nm">success</div><div class="hx">#16A34A</div></div>
+    <div class="sw"><div class="chip" style="background:#D97706"></div><div class="nm">warning</div><div class="hx">#D97706</div></div>
+    <div class="sw"><div class="chip" style="background:#DC2626"></div><div class="nm">danger</div><div class="hx">#DC2626</div></div>
+  </div>
+</section>
+
+<!-- 2. 타이포 -->
+<section>
+  <h2>2. 타이포그래피 — Pretendard</h2>
+  <p class="desc">숫자 정렬 영역(그리드·금액·KPI)은 tabular-nums 필수.</p>
+  <div class="tprow"><span class="tk">display 20/600</span><span style="font-size:20px;line-height:28px;font-weight:600;color:var(--n800)">수주 관리</span></div>
+  <div class="tprow"><span class="tk">heading 16/600</span><span style="font-size:16px;font-weight:600;color:var(--n800)">승인 대기 목록</span></div>
+  <div class="tprow"><span class="tk">body-md 14/400</span><span style="font-size:14px">폼과 서술형 본문에 사용합니다.</span></div>
+  <div class="tprow"><span class="tk">body 13/400 (기본)</span><span>그리드 셀과 목록의 기본 크기입니다.</span></div>
+  <div class="tprow"><span class="tk">caption 12/400</span><span style="font-size:12px;color:var(--n500)">그리드 헤더 · 보조 설명 · 타임스탬프</span></div>
+  <div class="tprow"><span class="tk">num-lg 24/700 tab</span><span style="font-size:24px;font-weight:700;color:var(--n800);font-variant-numeric:tabular-nums">₩12,340,000</span></div>
+</section>
+
+<!-- 3. 버튼 -->
+<section>
+  <h2>3. 버튼</h2>
+  <p class="desc">primary는 화면당 1개 원칙. 그리드 인라인은 sm ghost 계열.</p>
+  <div class="row" style="align-items:center">
+    <button class="btn pri">발주 승인</button>
+    <button class="btn sec">엑셀 다운로드</button>
+    <button class="btn gho">상세 보기</button>
+    <button class="btn dan">거절</button>
+    <button class="btn dgh">거절</button>
+    <button class="btn pri" disabled>저장</button>
+    <button class="btn pri sm">승인</button>
+    <button class="btn pri lg">로그인</button>
+  </div>
+</section>
+
+<!-- 4. 인풋 -->
+<section>
+  <h2>4. 인풋 · 셀렉트 · 날짜 범위</h2>
+  <div class="row">
+    <div><p class="lbl">기본 (포커스해 보세요)</p><input class="inp" placeholder="품목명 검색"></div>
+    <div><p class="lbl">단위 서픽스 — 우측 정렬 + tabular</p><span class="suffix" data-unit="원"><input class="inp" value="1,240,000"></span></div>
+    <div><p class="lbl">에러 — 원인+해결 톤</p><input class="inp err" value="A-101"><div class="errmsg">품목코드 'A-101'이 이미 존재합니다. 다른 코드를 입력하세요</div></div>
+  </div>
+  <div class="row" style="margin-top:16px;align-items:center">
+    <p class="lbl" style="margin:0">날짜 프리셋:</p>
+    <span class="chip">오늘</span><span class="chip on">7일</span><span class="chip">30일</span><span class="chip">직접 지정</span>
+    <span class="cnt">2026-07-13 ~ 2026-07-19</span>
+  </div>
+</section>
+
+<!-- 5. 상태 뱃지 -->
+<section>
+  <h2>5. 발주 상태 뱃지 (7종)</h2>
+  <p class="desc">라벨은 tokens.json의 label 값 강제. 위: badge-sm(그리드) / 아래: badge-md(상세·모달).</p>
+  <div class="row" style="gap:8px">
+    <span class="bdg s" style="background:var(--st-sub-bg);color:var(--st-sub-t)">제출됨</span>
+    <span class="bdg s" style="background:var(--st-pen-bg);color:var(--st-pen-t)">승인 대기</span>
+    <span class="bdg s" style="background:var(--st-app-bg);color:var(--st-app-t)">승인됨</span>
+    <span class="bdg s" style="background:var(--st-rej-bg);color:var(--st-rej-t)">거절됨</span>
+    <span class="bdg s" style="background:var(--st-shp-bg);color:var(--st-shp-t)">출하됨</span>
+    <span class="bdg s" style="background:var(--st-rcv-bg);color:var(--st-rcv-t)">입고 완료</span>
+    <span class="bdg s" style="background:var(--st-can-bg);color:var(--st-can-t)">취소됨</span>
+  </div>
+  <div class="row" style="gap:8px;margin-top:12px">
+    <span class="bdg m" style="background:var(--st-sub-bg);color:var(--st-sub-t)"><i class="dot" style="background:var(--st-sub)"></i>제출됨</span>
+    <span class="bdg m" style="background:var(--st-pen-bg);color:var(--st-pen-t)"><i class="dot" style="background:var(--st-pen)"></i>승인 대기</span>
+    <span class="bdg m" style="background:var(--st-app-bg);color:var(--st-app-t)"><i class="dot" style="background:var(--st-app)"></i>승인됨</span>
+    <span class="bdg m" style="background:var(--st-rcv-bg);color:var(--st-rcv-t)"><i class="dot" style="background:var(--st-rcv)"></i>입고 완료</span>
+  </div>
+</section>
+
+<!-- 6. 그리드 -->
+<section>
+  <h2>6. 데이터 그리드 (AG-Grid 목표 시각) + 필터바</h2>
+  <p class="desc">행 36 · 헤더 32 · 수평선만 · 호버 n50 · 선택 행 primary-bg · 숫자 우측 tabular · 액션 상시 노출.</p>
+  <div class="row" style="gap:8px;margin-bottom:4px;align-items:center">
+    <span style="font-size:12px;color:var(--n500)">프리셋:</span>
+    <span class="chip on">승인 대기</span><span class="chip">여신 초과</span><span class="chip">한정 품목 포함</span>
+  </div>
+  <div class="fbar">
+    <input class="inp" style="width:240px" placeholder="🔍 가맹점·발주번호 검색">
+    <span class="chip">상태: 승인 대기 ▾</span><span class="chip">가맹점 전체 ▾</span><span class="chip on">7일</span>
+    <span class="grow"></span>
+    <span class="cnt">총 1,234건</span>
+    <button class="btn sec sm">↓ 엑셀 다운로드</button>
+  </div>
+  <table class="grid">
+    <tr><th style="width:36px"><input type="checkbox"></th><th>발주번호</th><th>가맹점</th><th>상태</th><th class="r" style="text-align:right">품목</th><th class="r" style="text-align:right">총액</th><th>제출 시각</th><th style="width:120px">액션</th></tr>
+    <tr><td><input type="checkbox"></td><td>PO-260719-0412</td><td>강남1호점</td>
+      <td><span class="bdg s" style="background:var(--st-pen-bg);color:var(--st-pen-t)">승인 대기</span></td>
+      <td class="r">7건</td><td class="r">₩1,240,000</td><td class="dt">2026-07-19 09:12</td>
+      <td><button class="btn gho sm">승인</button><button class="btn dgh sm">거절</button></td></tr>
+    <tr class="sel"><td><input type="checkbox" checked></td><td>PO-260719-0413</td><td>서초점</td>
+      <td><span class="bdg s" style="background:var(--st-pen-bg);color:var(--st-pen-t)">승인 대기</span></td>
+      <td class="r">3건</td><td class="r">₩386,000</td><td class="dt">2026-07-19 10:44</td>
+      <td><button class="btn gho sm">승인</button><button class="btn dgh sm">거절</button></td></tr>
+    <tr><td><input type="checkbox"></td><td>PO-260719-0409</td><td>판교점</td>
+      <td><span class="bdg s" style="background:var(--st-app-bg);color:var(--st-app-t)">승인됨</span></td>
+      <td class="r">12건</td><td class="r">₩2,105,500</td><td class="dt">2026-07-19 08:03</td><td></td></tr>
+    <tr><td><input type="checkbox"></td><td>PO-260718-0388</td><td>수원역점</td>
+      <td><span class="bdg s" style="background:var(--st-rcv-bg);color:var(--st-rcv-t)">입고 완료</span></td>
+      <td class="r">9건</td><td class="r">₩874,000</td><td class="dt">2026-07-18 11:57</td><td></td></tr>
+    <tr><td><input type="checkbox"></td><td>PO-260718-0379</td><td>일산점</td>
+      <td><span class="bdg s" style="background:var(--st-rej-bg);color:var(--st-rej-t)">거절됨</span></td>
+      <td class="r">2건</td><td class="r">₩150,000</td><td class="dt">2026-07-18 11:21</td><td></td></tr>
+  </table>
+  <div class="note">로딩(스켈레톤) 형상 — 실제 행 레이아웃과 동일하게: <div class="row" style="margin-top:8px;gap:8px"><div class="sk" style="width:120px"></div><div class="sk" style="width:80px"></div><div class="sk" style="width:64px"></div><div class="sk" style="flex:1"></div></div></div>
+</section>
+
+<!-- 7. KPI + 연령분석 -->
+<section>
+  <h2>7. 대시보드 — KPI 스탯 카드 · 미수금 연령분석</h2>
+  <p class="desc">승인 대기 카드만 warning 강조(0건이면 해제) + 클릭 시 필터 이동. 연령 램프는 앰버 단일 hue, 연령분석 전용.</p>
+  <div class="kpis">
+    <div class="kpi"><div class="k">총 발주</div><div class="v">1,234</div><div class="d">전일 1,187</div></div>
+    <div class="kpi"><div class="k">자동 승인</div><div class="v">1,201</div><div class="d">97.3%</div></div>
+    <div class="kpi warn"><div class="k">승인 대기</div><div class="v">33</div><div class="d">한정 품목 21 · 여신 초과 12</div></div>
+    <div class="kpi"><div class="k">총 품목 수량</div><div class="v">48,920</div><div class="d">SKU 312종</div></div>
+  </div>
+  <div style="margin-top:24px">
+    <div class="age-legend">
+      <span><i style="background:var(--age1)"></i>0–30일</span><span><i style="background:var(--age2)"></i>31–60일</span>
+      <span><i style="background:var(--age3)"></i>61–90일</span><span><i style="background:var(--age4)"></i>90일+</span>
+    </div>
+    <div class="agrow aghead"><span>가맹점</span><span></span><span class="v">0–30</span><span class="v">31–60</span><span class="v">61–90</span><span class="v">90+</span><span class="v">합계</span></div>
+    <div class="agrow"><span><i class="ddot"></i>강남1호점</span>
+      <span class="bar"><i style="width:45%;background:var(--age1)"></i><i style="width:25%;background:var(--age2)"></i><i style="width:18%;background:var(--age3)"></i><i style="width:12%;background:var(--age4)"></i></span>
+      <span class="v">4,520,000</span><span class="v">2,510,000</span><span class="v">1,800,000</span><span class="v">1,204,000</span><span class="v tot">10,034,000</span></div>
+    <div class="agrow"><span>서초점</span>
+      <span class="bar" style="width:72%"><i style="width:60%;background:var(--age1)"></i><i style="width:30%;background:var(--age2)"></i><i style="width:10%;background:var(--age3)"></i></span>
+      <span class="v">4,320,000</span><span class="v">2,160,000</span><span class="v">720,000</span><span class="v">–</span><span class="v tot">7,200,000</span></div>
+    <div class="agrow"><span>판교점</span>
+      <span class="bar" style="width:41%"><i style="width:85%;background:var(--age1)"></i><i style="width:15%;background:var(--age2)"></i></span>
+      <span class="v">3,485,000</span><span class="v">615,000</span><span class="v">–</span><span class="v">–</span><span class="v tot">4,100,000</span></div>
+  </div>
+  <div class="note">규칙: 세그먼트 사이 2px 갭 · 값은 반드시 표 컬럼으로 병기(연한 단계 대비 부족 보완) · 여신 한도 초과는 행 앞 danger dot · 발주 상태 7색을 차트 시리즈로 재사용 금지.</div>
+</section>
+
+<!-- 8. 모달 -->
+<section>
+  <h2>8. 모달 — 거절 사유 (sm 400)</h2>
+  <div class="modal">
+    <div class="hd">수주 거절 <span class="x">✕</span></div>
+    <div class="bd">
+      <p style="font-size:14px;margin-bottom:16px">강남1호점 · <b class="num" style="font-weight:600">₩1,240,000</b> · 7건</p>
+      <p class="lbl">거절 사유 *</p>
+      <textarea class="inp" rows="3" placeholder="예: 한정 품목 재고 소진으로 익주 재발주 요청"></textarea>
+      <p style="font-size:12px;color:var(--n500);margin-top:8px">거절 시 한정 품목 재고가 복원됩니다.</p>
+    </div>
+    <div class="ft"><button class="btn sec">취소</button><button class="btn dan" disabled>거절</button></div>
+  </div>
+</section>
+
+<!-- 9. 토스트 / 배너 -->
+<section>
+  <h2>9. 토스트 · 배너</h2>
+  <p class="desc">토스트 = 사건(우하단, 최대 3개) / 배너 = 지속 상태. 낙관적 업데이트 성공엔 토스트를 띄우지 않는다.</p>
+  <div class="row">
+    <div class="toast ok">✓ 상품 1,000건 등록 완료</div>
+    <div class="toast ng">승인 실패 — 이미 김대리 님이 거절한 건입니다 <span class="a">새로고침</span></div>
+  </div>
+  <div class="row" style="margin-top:12px;flex-direction:column;gap:8px;max-width:560px">
+    <div class="banner info" style="width:100%">ℹ 지금 제출하면 익영업일(7월 20일) 마감분으로 접수됩니다 — 이월은 info, warning 금지</div>
+    <div class="banner dang" style="width:100%">⚠ 07-19 마감 배치가 실패했습니다. 재실행이 필요합니다</div>
+  </div>
+</section>
+
+<!-- 10. 셸 -->
+<section>
+  <h2>10. 앱 셸 미리보기 (축소 비율)</h2>
+  <p class="desc">실제: 사이드바 240 · 헤더 56 · 메뉴 h36 · 활성 = primary-bg + 좌측 3px 바. 미구현 마일스톤 메뉴는 숨김.</p>
+  <div class="shell">
+    <div class="side">
+      <div class="logo">OrderFlow <span style="font-weight:400;color:var(--n400);margin-left:6px;font-size:11px">한빛F&B</span></div>
+      <div class="mi">📊 대시보드</div>
+      <div class="mi on">📋 수주 관리</div>
+      <div class="mi">🚚 출하 지시</div>
+      <div class="mi">🏷️ 상품</div>
+      <div class="mi">💰 정산·미수금</div>
+      <div class="mi">🏪 가맹점</div>
+      <div style="flex:1"></div>
+      <div class="mi" style="border-top:1px solid var(--n100);border-radius:0">👤 김운영 · HQ_ADMIN</div>
+    </div>
+    <div class="main">
+      <div class="hd2">수주 관리 <span class="usr">🔔 &nbsp; 김운영 ▾</span></div>
+      <div class="cnt2">콘텐츠 영역 — 페이지 배경 neutral-50, 패딩 24</div>
+    </div>
+  </div>
+</section>
+
+<p style="font-size:12px;color:var(--n400);max-width:1080px">OrderFlow Design System v1.0 — 이 파일은 시각 레퍼런스다. 구현 값은 tokens.json, 동작 규칙은 02-patterns.md·03-web-components.md를 따른다. (아이콘은 이 문서에서만 이모지로 대체 — 실제는 Lucide)</p>
+
+</body>
+</html>
