@@ -52,6 +52,14 @@ public class GlobalExceptionHandler {
                 .body(ErrorResponse.of(CommonErrorCode.INVALID_REQUEST));
     }
 
+    /** 유니크 제약 등 DB 정합성 위반 — 사전 검사 사이의 레이스 안전망 (예: 이메일 전역 유일) */
+    @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handleDataIntegrity(
+            org.springframework.dao.DataIntegrityViolationException e) {
+        return ResponseEntity.status(CommonErrorCode.CONFLICT.status())
+                .body(ErrorResponse.of(CommonErrorCode.CONFLICT));
+    }
+
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<ErrorResponse> handleNoResource(NoResourceFoundException e) {
         return ResponseEntity.status(CommonErrorCode.RESOURCE_NOT_FOUND.status())

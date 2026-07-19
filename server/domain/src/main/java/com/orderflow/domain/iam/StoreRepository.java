@@ -1,6 +1,8 @@
 package com.orderflow.domain.iam;
 
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
@@ -15,4 +17,8 @@ public interface StoreRepository extends Repository<Store, Long> {
      */
     @Query("select s from Store s where s.id = :id")
     Optional<Store> findById(@Param("id") Long id);
+
+    /** 가맹점 목록 (api-spec 2.4.7) — 테넌트 스코프는 필터가 강제한다. */
+    @Query("select s from Store s where (:status is null or s.status = :status)")
+    Page<Store> findAllByOptionalStatus(@Param("status") StoreStatus status, Pageable pageable);
 }

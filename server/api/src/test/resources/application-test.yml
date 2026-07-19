@@ -18,3 +18,8 @@ spring:
     redis:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:16379}
+      database: 1 # 로컬 개발(0번 DB)과 분리 — 테스트가 개발 중 발급된 토큰을 건드리지 않게 한다
+
+orderflow:
+  jwt:
+    secret: orderflow-test-secret-key-32bytes-or-more!!

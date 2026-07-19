@@ -16,3 +16,8 @@ spring:
     redis:
       host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:16379}
+
+orderflow:
+  jwt:
+    # 로컬 개발 전용 기본값 — 배포 환경은 JWT_SECRET 환경변수 필수 (base yml은 기본값 없음)
+    secret: ${JWT_SECRET:orderflow-local-dev-secret-do-not-use-in-prod}

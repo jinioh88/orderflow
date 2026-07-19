@@ -2,6 +2,7 @@ package com.orderflow.api.common.error;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -14,8 +15,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * 공통 규약 계약 테스트 — api-spec.md 1.3(래퍼)·1.4(에러 코드)가 실제 응답과 일치하는지 검증한다.
  * 웹·앱 인터셉터가 이 형식에 의존하므로 이 테스트가 깨지면 계약 위반이다.
+ * Security 필터는 제외한다 — 인증/인가 계약은 API 통합 테스트가 검증한다.
  */
 @WebMvcTest(ErrorContractTestController.class)
+@AutoConfigureMockMvc(addFilters = false)
 class GlobalExceptionHandlerTest {
 
     @Autowired

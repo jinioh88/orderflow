@@ -1,6 +1,9 @@
 package com.orderflow.domain.iam;
 
+import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import org.springframework.data.repository.query.Param;
@@ -21,4 +24,19 @@ public interface UserRepository extends Repository<User, Long> {
 
     /** 이메일 전역 중복 검사 (api-spec `EMAIL_DUPLICATED`) — 전역 검사이므로 UNFILTERED 컨텍스트에서 호출한다. */
     boolean existsByEmail(String email);
+
+    /** 가맹점 비활성화 시 소속 사용자 토큰 무효화 대상 조회 (api-spec 2.2 무효화 이벤트) */
+    List<User> findAllByStoreId(Long storeId);
+
+    /** 계정 목록 (api-spec 2.4.11) — 선택 필터 3종. 테넌트 스코프는 필터가 강제한다. */
+    @Query("""
+            select u from User u
+            where (:storeId is null or u.storeId = :storeId)
+              and (:status is null or u.status = :status)
+              and (:role is null or u.role = :role)
+            """)
+    Page<User> findAllByFilters(@Param("storeId") Long storeId,
+                                @Param("status") UserStatus status,
+                                @Param("role") UserRole role,
+                                Pageable pageable);
 }

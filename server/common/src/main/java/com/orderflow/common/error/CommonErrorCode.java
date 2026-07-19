@@ -2,7 +2,7 @@ package com.orderflow.common.error;
 
 /**
  * 공통 에러 코드 — api-spec.md 1.4와 1:1로 대응한다.
- * TOKEN_EXPIRED는 스펙에 예약만 되어 있고 AUTH 에픽 구현 시 추가한다.
+ * AUTH 도메인 코드(TOKEN_EXPIRED 등)는 {@link AuthErrorCode}에 있다.
  */
 public enum CommonErrorCode implements ErrorCode {
 

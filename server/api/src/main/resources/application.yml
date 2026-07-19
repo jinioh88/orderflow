@@ -8,3 +8,13 @@ spring:
     properties:
       hibernate:
         default_batch_fetch_size: 100
+
+orderflow:
+  jwt:
+    secret: ${JWT_SECRET:} # 32바이트 이상 필수 — 비어 있으면 기동 실패 (NFR-2.5, local 프로필은 개발용 기본값 제공)
+    access-token-ttl: 30m # api-spec 2.2
+  auth:
+    refresh-token-ttl: 14d # api-spec 2.2 — 회전 시 재시작(슬라이딩)
+  system-admin: # 최초 SYSTEM 계정 멱등 부트스트랩 (api-spec 2.1) — 미설정 시 생략
+    email: ${SYSTEM_ADMIN_EMAIL:}
+    password: ${SYSTEM_ADMIN_PASSWORD:}

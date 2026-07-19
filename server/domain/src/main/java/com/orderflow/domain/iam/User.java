@@ -110,6 +110,12 @@ public class User extends BaseEntity {
                 UserRole.STORE_OWNER, PasswordStatus.TEMPORARY);
     }
 
+    /** 본사 운영자 — MVP에는 발급 API가 없다(스펙 2.1). 인가 매트릭스 검증·시드용 도메인 경로만 열어 둔다. */
+    public static User registerHqManager(Long tenantId, String email, String encodedTemporaryPassword, String name) {
+        return new User(tenantId, null, email, encodedTemporaryPassword, name,
+                UserRole.HQ_MANAGER, PasswordStatus.TEMPORARY);
+    }
+
     /** 본인 비밀번호 설정 — 임시 상태 해제 (api-spec 2.4.4). 일반 변경에도 동일하게 쓴다. */
     public void confirmPassword(String encodedNewPassword) {
         Assert.hasText(encodedNewPassword, "비밀번호는 필수다");

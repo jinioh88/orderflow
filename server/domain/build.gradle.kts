@@ -4,7 +4,8 @@ val querydslVersion = "7.0"
 
 dependencies {
     "api"(project(":common"))
-    "implementation"("org.springframework.boot:spring-boot-starter-data-jpa")
+    // 리포지토리 인터페이스가 Page/Pageable 등 Spring Data 타입을 시그니처에 노출하므로 api 스코프
+    "api"("org.springframework.boot:spring-boot-starter-data-jpa")
     "implementation"("io.github.openfeign.querydsl:querydsl-core:$querydslVersion")
     "annotationProcessor"("io.github.openfeign.querydsl:querydsl-apt:$querydslVersion:jpa")
     "annotationProcessor"("jakarta.persistence:jakarta.persistence-api")
