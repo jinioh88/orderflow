@@ -3,6 +3,7 @@ package com.orderflow.api.iam;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.orderflow.api.support.IntegrationTest;
+import com.orderflow.api.support.TenantScope;
 import com.orderflow.domain.iam.PasswordStatus;
 import com.orderflow.domain.iam.Store;
 import com.orderflow.domain.iam.StoreRepository;
@@ -39,8 +40,7 @@ class IamPersistenceTest extends IntegrationTest {
         Store store = storeRepository.save(Store.register(tenant.getId(), "강남역점", "서울 강남구"));
         User owner = userRepository.save(User.registerStoreOwner(
                 tenant.getId(), store.getId(), "owner@test.com", "$2a$10$encoded", "박점주"));
-        em.flush();
-        em.clear();
+        TenantScope.tenant(em, tenant.getId());
 
         User found = userRepository.findByEmail("owner@test.com").orElseThrow();
         assertThat(found.getTenantId()).isEqualTo(tenant.getId());
@@ -55,8 +55,7 @@ class IamPersistenceTest extends IntegrationTest {
     void persistSystemAccountWithoutTenant() {
         User system = userRepository.save(
                 User.registerSystem("system@orderflow.io", "$2a$10$encoded", "시스템 관리자"));
-        em.flush();
-        em.clear();
+        TenantScope.unfiltered(em);
 
         User found = userRepository.findById(system.getId()).orElseThrow();
         assertThat(found.getTenantId()).isNull();
@@ -68,7 +67,7 @@ class IamPersistenceTest extends IntegrationTest {
     void emailUniquenessCheck() {
         Tenant tenant = tenantRepository.save(Tenant.register("본죽F&B", null));
         userRepository.save(User.registerHqAdmin(tenant.getId(), "admin@test.com", "$2a$10$encoded", "김운영"));
-        em.flush();
+        TenantScope.unfiltered(em);
 
         assertThat(userRepository.existsByEmail("admin@test.com")).isTrue();
         assertThat(userRepository.existsByEmail("other@test.com")).isFalse();

@@ -2,6 +2,7 @@ package com.orderflow.domain.iam;
 
 import com.orderflow.domain.common.BaseEntity;
 import com.orderflow.domain.common.InvalidStateTransitionException;
+import com.orderflow.domain.common.TenantFilter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -14,15 +15,18 @@ import jakarta.persistence.UniqueConstraint;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Filter;
 import org.springframework.util.Assert;
 
 /**
  * 사용자 계정 (04 §2.1) — 테이블명 users는 MySQL 예약어 회피.
  * 불변식: STORE_* 역할은 store_id 필수, HQ_* 역할은 store_id 없음, SYSTEM만 tenant_id 없음.
  * 비밀번호는 항상 bcrypt 해시로 전달받아 저장한다 (NFR-2.5) — 평문은 도메인에 들어오지 않는다.
+ * 테넌트 필터 적용 — SYSTEM 계정(tenant_id NULL)은 테넌트 스코프 세션에서 자연히 걸러진다.
  */
 @Entity
 @Table(name = "users", uniqueConstraints = @UniqueConstraint(name = "uk_users_email", columnNames = "email"))
+@Filter(name = TenantFilter.NAME, condition = TenantFilter.CONDITION)
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class User extends BaseEntity {

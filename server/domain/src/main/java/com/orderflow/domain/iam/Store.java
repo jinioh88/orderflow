@@ -2,6 +2,7 @@ package com.orderflow.domain.iam;
 
 import com.orderflow.domain.common.BaseEntity;
 import com.orderflow.domain.common.InvalidStateTransitionException;
+import com.orderflow.domain.common.TenantFilter;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -14,6 +15,7 @@ import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Filter;
 import org.springframework.util.Assert;
 
 /**
@@ -22,6 +24,7 @@ import org.springframework.util.Assert;
  */
 @Entity
 @Table(name = "store", indexes = @Index(name = "idx_store_tenant_status", columnList = "tenant_id, status"))
+@Filter(name = TenantFilter.NAME, condition = TenantFilter.CONDITION)
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Store extends BaseEntity {
