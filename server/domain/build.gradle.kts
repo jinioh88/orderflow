@@ -8,4 +8,5 @@ dependencies {
     "implementation"("io.github.openfeign.querydsl:querydsl-core:$querydslVersion")
     "annotationProcessor"("io.github.openfeign.querydsl:querydsl-apt:$querydslVersion:jpa")
     "annotationProcessor"("jakarta.persistence:jakarta.persistence-api")
+    "testImplementation"("org.springframework.boot:spring-boot-starter-test")
 }

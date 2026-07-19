@@ -1,13 +1,19 @@
 # 테스트 프로필 — docker-compose의 MySQL/Redis를 재사용하되 전용 DB(orderflow_test)를 쓴다.
-# 테스트 간 데이터 격리: 스키마는 create-drop, 테스트 단위 격리는 IntegrationTest의 @Transactional 롤백.
+# 스키마: 수동 관리 DDL(db/schema.sql)을 매 실행 시 자동 적용(drop & create — 사용자 승인 2026-07-19)하고,
+#         ddl-auto: validate로 엔티티 매핑과 스크립트(=erd.md)의 드리프트를 조기 검출한다.
+# 테스트 간 데이터 격리: IntegrationTest의 @Transactional 롤백.
 spring:
   datasource:
     url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:13306}/${TEST_DB_NAME:orderflow_test}?characterEncoding=UTF-8&serverTimezone=Asia/Seoul
     username: ${DB_USERNAME:orderflow}
     password: ${DB_PASSWORD:orderflow-local}
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:db/schema.sql
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: validate
   data:
     redis:
       host: ${REDIS_HOST:localhost}
