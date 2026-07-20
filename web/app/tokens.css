@@ -1,0 +1,154 @@
+/* 자동 생성 파일 — 직접 수정하지 말 것.
+ * 생성: npm run tokens  (원본: design/design-system/tokens.json)
+ * tokens.json 버전: 1.0.0
+ */
+
+/* core — 원시 팔레트. 화면 코드에서 직접 참조 금지(01-foundations §0).
+   semantic/web 토큰의 원본 값 추적용으로만 노출한다. */
+:root {
+  --core-color-neutral-0: #FFFFFF;
+  --core-color-neutral-50: #F8FAFC;
+  --core-color-neutral-100: #F1F5F9;
+  --core-color-neutral-200: #E2E8F0;
+  --core-color-neutral-300: #CBD5E1;
+  --core-color-neutral-400: #94A3B8;
+  --core-color-neutral-500: #64748B;
+  --core-color-neutral-600: #475569;
+  --core-color-neutral-700: #334155;
+  --core-color-neutral-800: #1E293B;
+  --core-color-neutral-900: #0F172A;
+  --core-color-blue-50: #EFF6FF;
+  --core-color-blue-100: #DBEAFE;
+  --core-color-blue-300: #93C5FD;
+  --core-color-blue-500: #3B82F6;
+  --core-color-blue-600: #2563EB;
+  --core-color-blue-700: #1D4ED8;
+  --core-color-blue-800: #1E40AF;
+  --core-color-orange-50: #FFF7ED;
+  --core-color-orange-100: #FFEDD5;
+  --core-color-orange-300: #FDBA74;
+  --core-color-orange-500: #F97316;
+  --core-color-orange-600: #EA580C;
+  --core-color-orange-700: #C2410C;
+  --core-color-orange-800: #9A3412;
+  --core-color-green-50: #F0FDF4;
+  --core-color-green-200: #BBF7D0;
+  --core-color-green-600: #16A34A;
+  --core-color-green-700: #15803D;
+  --core-color-amber-50: #FFFBEB;
+  --core-color-amber-200: #FDE68A;
+  --core-color-amber-600: #D97706;
+  --core-color-amber-700: #B45309;
+  --core-color-red-50: #FEF2F2;
+  --core-color-red-200: #FECACA;
+  --core-color-red-600: #DC2626;
+  --core-color-red-700: #B91C1C;
+  --core-color-violet-50: #F5F3FF;
+  --core-color-violet-200: #DDD6FE;
+  --core-color-violet-600: #7C3AED;
+  --core-color-violet-700: #6D28D9;
+  --core-color-teal-50: #F0FDFA;
+  --core-color-teal-200: #99F6E4;
+  --core-color-teal-600: #0D9488;
+  --core-color-teal-700: #0F766E;
+}
+
+@theme {
+  /* 폰트 — 실제 Pretendard 로드는 next/font/local(app/fonts.ts)이 담당하고,
+     여기서는 폴백 체인만 정의한다. */
+  --font-sans: var(--font-pretendard), system-ui, -apple-system, 'Apple SD Gothic Neo', sans-serif;
+
+  /* web.color — 브랜드·표면·텍스트 */
+  --color-primary: #2563EB;
+  --color-primary-hover: #1D4ED8;
+  --color-primary-bg: #EFF6FF;
+  --color-page-bg: #F8FAFC;
+  --color-surface: #FFFFFF;
+  --color-border: #E2E8F0;
+  --color-border-strong: #CBD5E1;
+  --color-fg-title: #1E293B;
+  --color-fg-body: #334155;
+  --color-fg-caption: #64748B;
+  --color-fg-disabled: #94A3B8;
+  --color-grid-row-alt: #F8FAFC;
+  --color-grid-row-selected: #EFF6FF;
+
+  /* semantic.feedback — 성공·주의·위험·안내 (웹·앱 공통 hue) */
+  --color-success-solid: #16A34A;
+  --color-success-text: #15803D;
+  --color-success-bg: #F0FDF4;
+  --color-warning-solid: #D97706;
+  --color-warning-text: #B45309;
+  --color-warning-bg: #FFFBEB;
+  --color-danger-solid: #DC2626;
+  --color-danger-text: #B91C1C;
+  --color-danger-bg: #FEF2F2;
+  --color-info-solid: #2563EB;
+  --color-info-text: #1D4ED8;
+  --color-info-bg: #EFF6FF;
+
+  /* semantic.orderStatus — 발주 상태 7색. 라벨은 lib/design/order-status.ts */
+  --color-status-submitted-dot: #2563EB;
+  --color-status-submitted-text: #1D4ED8;
+  --color-status-submitted-bg: #EFF6FF;
+  --color-status-pending-approval-dot: #D97706;
+  --color-status-pending-approval-text: #B45309;
+  --color-status-pending-approval-bg: #FFFBEB;
+  --color-status-approved-dot: #16A34A;
+  --color-status-approved-text: #15803D;
+  --color-status-approved-bg: #F0FDF4;
+  --color-status-rejected-dot: #DC2626;
+  --color-status-rejected-text: #B91C1C;
+  --color-status-rejected-bg: #FEF2F2;
+  --color-status-shipped-dot: #7C3AED;
+  --color-status-shipped-text: #6D28D9;
+  --color-status-shipped-bg: #F5F3FF;
+  --color-status-received-dot: #0D9488;
+  --color-status-received-text: #0F766E;
+  --color-status-received-bg: #F0FDFA;
+  --color-status-canceled-dot: #94A3B8;
+  --color-status-canceled-text: #475569;
+  --color-status-canceled-bg: #F1F5F9;
+
+  /* web.typography — 크기/행간/굵기를 한 유틸리티(text-*)로 묶는다 */
+  --text-display: 20px;
+  --text-display--line-height: 28px;
+  --text-display--font-weight: 600;
+  --text-heading: 16px;
+  --text-heading--line-height: 24px;
+  --text-heading--font-weight: 600;
+  --text-body-md: 14px;
+  --text-body-md--line-height: 20px;
+  --text-body-md--font-weight: 400;
+  --text-body: 13px;
+  --text-body--line-height: 20px;
+  --text-body--font-weight: 400;
+  --text-body-strong: 13px;
+  --text-body-strong--line-height: 20px;
+  --text-body-strong--font-weight: 600;
+  --text-caption: 12px;
+  --text-caption--line-height: 16px;
+  --text-caption--font-weight: 400;
+  --text-num: 13px;
+  --text-num--line-height: 20px;
+  --text-num--font-weight: 400;
+  --text-num-lg: 24px;
+  --text-num-lg--line-height: 32px;
+  --text-num-lg--font-weight: 700;
+
+  /* web.radius — Tailwind 기본값을 웹 스케일로 덮어쓴다 */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-full: 999px;
+
+  /* web.shadow — 관제탑은 보더 우선, 카드는 shadow-1이 상한(01 §3.3) */
+  --shadow-1: 0 1px 2px rgba(15,23,42,0.06);
+  --shadow-2: 0 4px 12px rgba(15,23,42,0.10);
+  --shadow-3: 0 12px 32px rgba(15,23,42,0.16);
+
+  /* web.layout — 셸 치수(03 §1). w-sidebar / h-header 로 쓴다 */
+  --spacing-sidebar: 240px;
+  --spacing-header: 56px;
+  --spacing-min-viewport: 1280px;
+}

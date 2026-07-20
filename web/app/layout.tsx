@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { pretendard } from "./fonts";
 import { Providers } from "./providers";
+import { ToastProvider } from "@/components/ui/toast";
 
 export const metadata: Metadata = {
   title: {
@@ -16,9 +18,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko" className="h-full antialiased">
-      <body className="min-h-full bg-gray-50 text-gray-900">
-        <Providers>{children}</Providers>
+    <html lang="ko" className={`${pretendard.variable} h-full antialiased`}>
+      {/* 최소 뷰포트 1280 — 반응형 없이 가로 스크롤 허용 (03 §1) */}
+      <body className="min-w-min-viewport min-h-full bg-page-bg font-sans text-body text-fg-body">
+        <Providers>
+          <ToastProvider>{children}</ToastProvider>
+        </Providers>
       </body>
     </html>
   );

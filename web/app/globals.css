@@ -1,4 +1,14 @@
 @import "tailwindcss";
+@import "./tokens.css";
 
 /* 색·글꼴은 Tailwind 유틸리티로만 지정한다 — 비레이어 전역 규칙은
    유틸리티보다 우선순위가 높아져 클래스가 죽으므로 여기에 두지 않는다. */
+
+@layer utilities {
+  /* 숫자 정렬이 필요한 타이포 토큰은 tabular figures를 항상 켠다 (01-foundations §2).
+     tokens.json의 `tabularNums: true`에 대응 — 그리드 숫자 셀·KPI 수치. */
+  .text-num,
+  .text-num-lg {
+    font-variant-numeric: tabular-nums;
+  }
+}
