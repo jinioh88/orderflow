@@ -61,6 +61,13 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
+  # Pretendard 가변 폰트 1개로 weight 100~900을 모두 커버한다
+  # (디자인 시스템 01-foundations §2 — 웹·앱 공통 폰트).
+  fonts:
+    - family: Pretendard
+      fonts:
+        - asset: assets/fonts/PretendardVariable.ttf
+
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg
