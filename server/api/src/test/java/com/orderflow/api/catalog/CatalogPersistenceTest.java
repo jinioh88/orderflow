@@ -56,7 +56,7 @@ class CatalogPersistenceTest extends IntegrationTest {
     void persistCatalogAggregates() {
         Product saved = productRepository.save(product(tenantA.getId(), "P-0001", "8801111111111"));
         saved.designateLimited();
-        hqStockRepository.save(HqStock.create(tenantA.getId(), saved.getId(), 100));
+        hqStockRepository.save(HqStock.create(saved, 100));
         TenantScope.tenant(em, tenantA.getId());
 
         Product found = productRepository.findById(saved.getId()).orElseThrow();
@@ -74,7 +74,7 @@ class CatalogPersistenceTest extends IntegrationTest {
     void tenantFilterAppliesToCatalog() {
         Product mine = productRepository.save(product(tenantA.getId(), "P-0001", "8801111111111"));
         Product others = productRepository.save(product(tenantB.getId(), "P-0002", "8802222222222"));
-        hqStockRepository.save(HqStock.create(tenantB.getId(), others.getId(), 50));
+        hqStockRepository.save(HqStock.create(others, 50));
         TenantScope.tenant(em, tenantA.getId());
 
         assertThat(productRepository.findById(mine.getId())).isPresent();
@@ -101,7 +101,7 @@ class CatalogPersistenceTest extends IntegrationTest {
     @DisplayName("available_qty ≥ 0 은 DB CHECK가 최후 방어선이다 (NFR-3.1)")
     void availableQtyCheckConstraintIsLastLineOfDefense() {
         Product saved = productRepository.save(product(tenantA.getId(), "P-0001", "8801111111111"));
-        hqStockRepository.save(HqStock.create(tenantA.getId(), saved.getId(), 10));
+        hqStockRepository.save(HqStock.create(saved, 10));
         em.flush();
 
         assertThatThrownBy(() -> em.createNativeQuery(

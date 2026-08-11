@@ -43,17 +43,21 @@ public class HqStock extends BaseEntity {
     private int availableQty;
 
     private HqStock(Long tenantId, Long productId, int availableQty) {
-        Assert.notNull(tenantId, "가용 재고는 테넌트 소속이어야 한다");
-        Assert.notNull(productId, "가용 재고는 상품에 속해야 한다");
         requireNonNegative(availableQty);
         this.tenantId = tenantId;
         this.productId = productId;
         this.availableQty = availableQty;
     }
 
-    /** 한정 품목 지정 시 생성 (US-CAT-04, api-spec 3.2.6) — product당 1행. */
-    public static HqStock create(Long tenantId, Long productId, int availableQty) {
-        return new HqStock(tenantId, productId, availableQty);
+    /**
+     * 한정 품목 지정 시 생성 (US-CAT-04, api-spec 3.2.6) — product당 1행.
+     * 테넌트는 상품에서 복사한다 — 호출자가 (tenantId, productId)를 따로 조합하면
+     * 상품과 재고의 테넌트가 어긋난 행을 만들 수 있다 (CAT-1 리뷰, NFR-2.4).
+     */
+    public static HqStock create(Product product, int availableQty) {
+        Assert.notNull(product, "가용 재고는 상품에 속해야 한다");
+        Assert.notNull(product.getId(), "저장된 상품이어야 한다");
+        return new HqStock(product.getTenantId(), product.getId(), availableQty);
     }
 
     /** 가용 재고 설정 — 절대값 교체, 증감 아님 (US-CAT-04, api-spec 3.2.8). */

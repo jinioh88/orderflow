@@ -36,6 +36,18 @@ class ProductTest {
     }
 
     @Test
+    @DisplayName("단가는 DECIMAL(15,2) 범위를 넘을 수 없다 — 소수 셋째 자리·정수 14자리 거부 (CAT-1 리뷰)")
+    void unitPriceMustFitDecimal15_2() {
+        assertThatIllegalArgumentException().isThrownBy(() ->
+                Product.register(1L, "P-0001", "김치만두 1kg", "8801234567890",
+                        "냉동식품", "BOX", new BigDecimal("12000.005")));
+
+        assertThatIllegalArgumentException().isThrownBy(() ->
+                Product.register(1L, "P-0001", "김치만두 1kg", "8801234567890",
+                        "냉동식품", "BOX", new BigDecimal("10000000000000")));
+    }
+
+    @Test
     @DisplayName("수정은 품목코드를 제외한 카탈로그 속성을 전체 교체한다 (api-spec 3.2.4)")
     void updateReplacesCatalogAttributes() {
         Product product = product();

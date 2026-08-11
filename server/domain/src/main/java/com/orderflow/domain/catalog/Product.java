@@ -141,5 +141,8 @@ public class Product extends BaseEntity {
         Assert.hasText(orderUnit, "발주 단위는 필수다");
         Assert.notNull(unitPrice, "단가는 필수다");
         Assert.isTrue(unitPrice.signum() >= 0, "단가는 0 이상이어야 한다");
+        // DECIMAL(15,2) 초과 값은 DB에서 조용히 반올림/실패한다 — 도메인에서 선제 차단 (CAT-1 리뷰)
+        Assert.isTrue(unitPrice.scale() <= 2, "단가는 소수 둘째 자리까지만 허용된다");
+        Assert.isTrue(unitPrice.precision() - unitPrice.scale() <= 13, "단가가 허용 범위를 초과했다");
     }
 }
