@@ -59,6 +59,8 @@ public abstract class ApiIntegrationTest {
     @AfterEach
     void cleanUpFixtures() {
         TenantContext.clear();
+        jdbcTemplate.update("DELETE FROM hq_stock");
+        jdbcTemplate.update("DELETE FROM product");
         jdbcTemplate.update("DELETE FROM users");
         jdbcTemplate.update("DELETE FROM store");
         jdbcTemplate.update("DELETE FROM tenant");
