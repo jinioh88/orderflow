@@ -4,15 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -28,29 +23,7 @@ class ProductExcelValidationTest {
 
     /** 헤더 + 데이터 행들로 .xlsx 생성. 각 행은 셀 값 배열(문자열/숫자 혼용) */
     private InputStream workbook(List<String> headers, List<List<Object>> dataRows) {
-        try (XSSFWorkbook wb = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            Sheet sheet = wb.createSheet();
-            Row header = sheet.createRow(0);
-            for (int c = 0; c < headers.size(); c++) {
-                header.createCell(c).setCellValue(headers.get(c));
-            }
-            for (int r = 0; r < dataRows.size(); r++) {
-                Row row = sheet.createRow(r + 1);
-                List<Object> cells = dataRows.get(r);
-                for (int c = 0; c < cells.size(); c++) {
-                    Object value = cells.get(c);
-                    if (value instanceof Number number) {
-                        row.createCell(c).setCellValue(number.doubleValue());
-                    } else if (value != null) {
-                        row.createCell(c).setCellValue(value.toString());
-                    }
-                }
-            }
-            wb.write(out);
-            return new ByteArrayInputStream(out.toByteArray());
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        }
+        return new ByteArrayInputStream(ExcelTestFiles.xlsx(headers, dataRows));
     }
 
     private List<Object> normalRow(String code, String barcode) {

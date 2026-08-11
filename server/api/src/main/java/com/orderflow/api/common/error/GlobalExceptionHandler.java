@@ -1,7 +1,9 @@
 package com.orderflow.api.common.error;
 
+import com.orderflow.api.catalog.excel.ExcelValidationException;
 import com.orderflow.api.common.response.ErrorResponse;
 import com.orderflow.common.error.BusinessException;
+import com.orderflow.common.error.CatalogErrorCode;
 import com.orderflow.common.error.CommonErrorCode;
 import com.orderflow.common.error.ErrorCode;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +15,8 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.util.List;
@@ -32,10 +36,29 @@ public class GlobalExceptionHandler {
                 .body(ErrorResponse.of(errorCode, e.getMessage()));
     }
 
+    /** 엑셀 행 오류 — details를 {row, field, reason}으로 확장한다 (api-spec 3.3.2) */
+    @ExceptionHandler(ExcelValidationException.class)
+    public ResponseEntity<ErrorResponse> handleExcelValidation(ExcelValidationException e) {
+        List<ErrorResponse.FieldError> details = e.getErrors().stream()
+                .map(rowError -> ErrorResponse.FieldError.of(
+                        rowError.row(), rowError.field(), rowError.reason()))
+                .toList();
+        return ResponseEntity.status(e.getErrorCode().status())
+                .body(new ErrorResponse(new ErrorResponse.ErrorBody(
+                        e.getErrorCode().code(), e.getMessage(), details)));
+    }
+
+    /** 업로드 용량 초과 — 스펙상 10MB 초과는 EXCEL_FILE_INVALID (api-spec 3.3.1) */
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<ErrorResponse> handleMaxUploadSize(MaxUploadSizeExceededException e) {
+        return ResponseEntity.status(CatalogErrorCode.EXCEL_FILE_INVALID.status())
+                .body(ErrorResponse.of(CatalogErrorCode.EXCEL_FILE_INVALID, "파일이 최대 10MB를 초과했습니다."));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException e) {
         List<ErrorResponse.FieldError> details = e.getBindingResult().getFieldErrors().stream()
-                .map(fieldError -> new ErrorResponse.FieldError(
+                .map(fieldError -> ErrorResponse.FieldError.of(
                         fieldError.getField(), fieldError.getDefaultMessage()))
                 .toList();
         return ResponseEntity.status(CommonErrorCode.VALIDATION_ERROR.status())
@@ -45,6 +68,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({
             HttpMessageNotReadableException.class,
             MissingServletRequestParameterException.class,
+            MissingServletRequestPartException.class,
             MethodArgumentTypeMismatchException.class
     })
     public ResponseEntity<ErrorResponse> handleInvalidRequest(Exception e) {

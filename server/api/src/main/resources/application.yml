@@ -3,6 +3,10 @@ spring:
     name: orderflow-api
   profiles:
     default: local
+  servlet:
+    multipart: # 엑셀 업로드 상한 (api-spec 3.3.1) — 초과는 EXCEL_FILE_INVALID로 변환
+      max-file-size: 10MB
+      max-request-size: 11MB
   jpa:
     open-in-view: false
     properties:

@@ -71,4 +71,8 @@ public final class CatalogDtos {
 
     public record HqStockResponse(Long productId, int availableQty) {
     }
+
+    /** 엑셀 업로드 전량 반영 성공 응답 (api-spec 3.3.2) */
+    public record ExcelUploadResponse(int totalRows, long created, long updated) {
+    }
 }

@@ -11,6 +11,10 @@ public final class ProductExcelLayout {
     public static final List<String> UPLOAD_HEADERS =
             List.of("품목코드", "품명", "바코드", "카테고리", "발주단위", "단가");
 
+    /** 다운로드는 업로드 6열 + 읽기 전용 3열 (api-spec 3.3.1 — 업로드 시 G 이후 무시) */
+    public static final List<String> DOWNLOAD_HEADERS =
+            List.of("품목코드", "품명", "바코드", "카테고리", "발주단위", "단가", "한정품목", "가용재고", "상태");
+
     public static final int COL_PRODUCT_CODE = 0;
     public static final int COL_NAME = 1;
     public static final int COL_BARCODE = 2;
