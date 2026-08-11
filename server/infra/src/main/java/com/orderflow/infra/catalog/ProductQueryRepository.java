@@ -12,9 +12,9 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import java.util.List;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
@@ -39,11 +39,14 @@ public class ProductQueryRepository {
                 .limit(pageable.getPageSize())
                 .fetch();
 
-        Long total = queryFactory.select(product.count())
-                .from(product)
-                .where(predicates(condition))
-                .fetchOne();
-        return new PageImpl<>(items, pageable, total == null ? 0 : total);
+        // 마지막 페이지가 덜 찼으면 COUNT 쿼리를 건너뛴다
+        return PageableExecutionUtils.getPage(items, pageable, () -> {
+            Long total = queryFactory.select(product.count())
+                    .from(product)
+                    .where(predicates(condition))
+                    .fetchOne();
+            return total == null ? 0 : total;
+        });
     }
 
     /** 엑셀 다운로드용 전체 조회 — 페이징 없음, 품목코드 오름차순 고정 (api-spec 3.3.3) */

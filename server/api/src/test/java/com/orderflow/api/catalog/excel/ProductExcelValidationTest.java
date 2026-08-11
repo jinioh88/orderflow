@@ -77,6 +77,15 @@ class ProductExcelValidationTest {
         }
 
         @Test
+        @DisplayName("13자리 바코드 숫자 셀이 지수 표기로 깨지지 않는다 (CAT-2 셀프 리뷰 회귀)")
+        void preservesLongNumericCells() {
+            var rows = parser.parse(workbook(ProductExcelLayout.UPLOAD_HEADERS, List.of(
+                    List.of("P-0001", "만두", 8801111111111L, "냉동식품", "BOX", 12000))));
+
+            assertThat(rows.get(0).barcode()).isEqualTo("8801111111111");
+        }
+
+        @Test
         @DisplayName("헤더 불일치 — 열 위치와 기대 헤더를 사유에 명시")
         void rejectsWrongHeader() {
             assertThatThrownBy(() -> parser.parse(workbook(

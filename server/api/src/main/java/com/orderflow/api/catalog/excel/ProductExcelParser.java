@@ -5,9 +5,12 @@ import static com.orderflow.api.catalog.excel.ProductExcelLayout.UPLOAD_HEADERS;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.poi.ss.usermodel.DataFormatter;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -20,21 +23,21 @@ import org.springframework.stereotype.Component;
  * 셀 값의 의미 검증은 ProductExcelValidator가 담당한다.
  * 라이브러리 선정 근거(POI XSSF, 스트리밍 미채택)는 study/excel-library.md 참조.
  */
+@Slf4j
 @Component
 public class ProductExcelParser {
-
-    private final DataFormatter formatter = new DataFormatter();
 
     public List<ProductExcelRow> parse(InputStream inputStream) {
         try (Workbook workbook = new XSSFWorkbook(inputStream)) {
             Sheet sheet = workbook.getSheetAt(0);
             validateHeader(sheet.getRow(0));
             return readDataRows(sheet);
+        } catch (ExcelParseException e) {
+            throw e;
         } catch (IOException | RuntimeException e) {
-            if (e instanceof ExcelParseException parseException) {
-                throw parseException;
-            }
-            throw new ExcelParseException("엑셀 파일을 읽을 수 없습니다. .xlsx 형식인지 확인해 주세요.");
+            // POI는 파일 불량을 다양한 RuntimeException으로 던진다 — 원인은 보존·로깅하고 400으로 변환
+            log.warn("엑셀 파싱 실패 — 파일 불량 또는 파서 결함", e);
+            throw new ExcelParseException("엑셀 파일을 읽을 수 없습니다. .xlsx 형식인지 확인해 주세요.", e);
         }
     }
 
@@ -43,7 +46,7 @@ public class ProductExcelParser {
             throw new ExcelParseException("헤더 행(1행)이 없습니다.");
         }
         for (int col = 0; col < UPLOAD_HEADERS.size(); col++) {
-            String actual = formatter.formatCellValue(headerRow.getCell(col)).trim();
+            String actual = cellText(headerRow.getCell(col));
             if (!UPLOAD_HEADERS.get(col).equals(actual)) {
                 throw new ExcelParseException("헤더가 규격과 다릅니다. %d열은 '%s'여야 합니다 (현재: '%s')."
                         .formatted(col + 1, UPLOAD_HEADERS.get(col), actual.isEmpty() ? "빈칸" : actual));
@@ -84,6 +87,26 @@ public class ProductExcelParser {
     }
 
     private String cell(Row row, int col) {
-        return formatter.formatCellValue(row.getCell(col)).trim();
+        return cellText(row.getCell(col));
+    }
+
+    /**
+     * 셀 값을 문자열로 정규화. DataFormatter는 **표시용** 문자열을 돌려줘 13자리 바코드 같은
+     * 긴 숫자 셀이 지수 표기("8.80111E+12")로 깨진다 (CAT-2 셀프 리뷰) — 숫자 셀은
+     * BigDecimal로 정확한 평문을 만든다. double 정밀도(2^53)는 13자리 정수를 정확히 담는다.
+     */
+    private String cellText(Cell cell) {
+        if (cell == null) {
+            return "";
+        }
+        CellType type = cell.getCellType() == CellType.FORMULA
+                ? cell.getCachedFormulaResultType() : cell.getCellType();
+        return switch (type) {
+            case NUMERIC -> BigDecimal.valueOf(cell.getNumericCellValue())
+                    .stripTrailingZeros().toPlainString();
+            case STRING -> cell.getStringCellValue().trim();
+            case BOOLEAN -> String.valueOf(cell.getBooleanCellValue());
+            default -> "";
+        };
     }
 }

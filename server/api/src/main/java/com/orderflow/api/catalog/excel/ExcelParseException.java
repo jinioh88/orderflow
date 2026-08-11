@@ -12,4 +12,9 @@ public class ExcelParseException extends BusinessException {
     public ExcelParseException(String message) {
         super(CatalogErrorCode.EXCEL_FILE_INVALID, message);
     }
+
+    public ExcelParseException(String message, Throwable cause) {
+        super(CatalogErrorCode.EXCEL_FILE_INVALID, message);
+        initCause(cause);
+    }
 }

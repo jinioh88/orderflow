@@ -14,6 +14,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.ResultActions;
 
 /**
  * 한정 품목 지정·해제·가용 재고 설정 API 통합 테스트 (US-CAT-04, api-spec 3.2.6~3.2.8)
@@ -41,13 +42,18 @@ class LimitedProductApiTest extends ApiIntegrationTest {
         return objectMapper.writeValueAsString(Map.of("availableQty", qty));
     }
 
+    /** 한정 품목 지정 호출 — 다섯 케이스가 공유하는 픽스처 헬퍼 (기대치는 호출부에서 체이닝) */
+    private ResultActions designate(int qty) throws Exception {
+        return mockMvc.perform(post("/api/v1/products/" + productId + "/limited")
+                .header(HttpHeaders.AUTHORIZATION, bearer(bonjuk.admin()))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(qtyBody(qty)));
+    }
+
     @Test
     @DisplayName("한정 품목 지정 — 가용 재고와 함께 설정되고 단건 조회에 반영된다 (3.2.6)")
     void designateLimited() throws Exception {
-        mockMvc.perform(post("/api/v1/products/" + productId + "/limited")
-                        .header(HttpHeaders.AUTHORIZATION, bearer(bonjuk.admin()))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(qtyBody(100)))
+        designate(100)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.limited").value(true))
                 .andExpect(jsonPath("$.data.availableQty").value(100));
@@ -62,16 +68,10 @@ class LimitedProductApiTest extends ApiIntegrationTest {
     @Test
     @DisplayName("재지정은 409 ALREADY_LIMITED, 음수 수량은 400 (3.2.6)")
     void designateGuards() throws Exception {
-        mockMvc.perform(post("/api/v1/products/" + productId + "/limited")
-                        .header(HttpHeaders.AUTHORIZATION, bearer(bonjuk.admin()))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(qtyBody(100)))
+        designate(100)
                 .andExpect(status().isOk());
 
-        mockMvc.perform(post("/api/v1/products/" + productId + "/limited")
-                        .header(HttpHeaders.AUTHORIZATION, bearer(bonjuk.admin()))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(qtyBody(50)))
+        designate(50)
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.error.code").value("ALREADY_LIMITED"));
 
@@ -86,10 +86,7 @@ class LimitedProductApiTest extends ApiIntegrationTest {
     @Test
     @DisplayName("해제 — 가용 재고가 사라지고, 재해제는 409 NOT_LIMITED (3.2.7)")
     void releaseLimited() throws Exception {
-        mockMvc.perform(post("/api/v1/products/" + productId + "/limited")
-                        .header(HttpHeaders.AUTHORIZATION, bearer(bonjuk.admin()))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(qtyBody(100)))
+        designate(100)
                 .andExpect(status().isOk());
 
         mockMvc.perform(delete("/api/v1/products/" + productId + "/limited")
@@ -115,10 +112,7 @@ class LimitedProductApiTest extends ApiIntegrationTest {
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.error.code").value("NOT_LIMITED"));
 
-        mockMvc.perform(post("/api/v1/products/" + productId + "/limited")
-                        .header(HttpHeaders.AUTHORIZATION, bearer(bonjuk.admin()))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(qtyBody(100)))
+        designate(100)
                 .andExpect(status().isOk());
 
         mockMvc.perform(put("/api/v1/products/" + productId + "/hq-stock")

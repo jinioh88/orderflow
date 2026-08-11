@@ -23,11 +23,13 @@ public interface ProductRepository extends Repository<Product, Long> {
     @Query("select p from Product p where p.id = :id")
     Optional<Product> findById(@Param("id") Long id);
 
-    /** 품목코드 중복 사전 검사 (api-spec 3.4 PRODUCT_CODE_DUPLICATED) — DB 유니크가 안전망 */
-    @Query("select count(p) > 0 from Product p where p.productCode = :productCode")
-    boolean existsByProductCode(@Param("productCode") String productCode);
+    /**
+     * 품목코드 중복 사전 검사 (api-spec 3.4 PRODUCT_CODE_DUPLICATED) — DB 유니크가 안전망.
+     * 파생 쿼리는 JPQL로 생성되어 테넌트 필터가 적용된다 (JPQL 강제가 필요한 건 findById뿐).
+     */
+    boolean existsByProductCode(String productCode);
 
-    /** 바코드 중복 사전 검사 — 수정 시 자기 자신 제외 (excludeId null이면 등록 검사) */
+    /** 바코드 중복 사전 검사 — 수정 시 자기 자신 제외. null 분기가 있어 파생 쿼리로 못 쓴다 */
     @Query("""
             select count(p) > 0 from Product p
             where p.barcode = :barcode
@@ -36,9 +38,7 @@ public interface ProductRepository extends Repository<Product, Long> {
     boolean existsByBarcodeExcluding(@Param("barcode") String barcode, @Param("excludeId") Long excludeId);
 
     /** 엑셀 업로드의 등록/수정 구분·바코드 충돌 검사용 벌크 조회 (US-CAT-02) */
-    @Query("select p from Product p where p.productCode in :productCodes")
-    List<Product> findAllByProductCodeIn(@Param("productCodes") Collection<String> productCodes);
+    List<Product> findAllByProductCodeIn(Collection<String> productCodes);
 
-    @Query("select p from Product p where p.barcode in :barcodes")
-    List<Product> findAllByBarcodeIn(@Param("barcodes") Collection<String> barcodes);
+    List<Product> findAllByBarcodeIn(Collection<String> barcodes);
 }

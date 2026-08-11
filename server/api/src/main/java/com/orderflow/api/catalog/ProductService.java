@@ -104,8 +104,10 @@ public class ProductService {
         if (!product.isLimited()) {
             throw new BusinessException(CatalogErrorCode.NOT_LIMITED);
         }
+        // 한정인데 재고 행이 없으면 불변식 위반(04 §2.2) — 사용자 오류(409)로 위장하지 않는다
         HqStock stock = hqStockRepository.findByProductId(productId)
-                .orElseThrow(() -> new BusinessException(CatalogErrorCode.NOT_LIMITED));
+                .orElseThrow(() -> new IllegalStateException(
+                        "한정 품목의 가용 재고 레코드가 없습니다. productId=" + productId));
         stock.changeAvailableQty(request.availableQty());
         return new HqStockResponse(productId, stock.getAvailableQty());
     }
