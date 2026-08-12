@@ -2,20 +2,23 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@/features/auth/auth-context";
 import { cn } from "@/lib/utils/cn";
-import { VISIBLE_NAV_ITEMS } from "@/lib/design/nav";
+import { visibleNavItemsFor } from "@/lib/design/nav";
 
 /**
  * 사이드바 메뉴 (03 §1).
  * 항목 h=36, 아이콘 20 + 라벨 body-strong.
  * 활성 = primaryBg 배경 + primary 텍스트/아이콘 + 좌측 3px primary 바.
+ * 노출 목록은 로그인 역할 기준 (US-AUTH-03 — JWT 클레임 role).
  */
 export function SidebarNav() {
   const pathname = usePathname();
+  const { role } = useAuth();
 
   return (
     <nav className="flex flex-1 flex-col gap-1 p-3">
-      {VISIBLE_NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+      {visibleNavItemsFor(role).map(({ href, label, icon: Icon }) => {
         const active = pathname === href || pathname.startsWith(`${href}/`);
         return (
           <Link

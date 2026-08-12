@@ -3,6 +3,7 @@ import "./globals.css";
 import { pretendard } from "./fonts";
 import { Providers } from "./providers";
 import { ToastProvider } from "@/components/ui/toast";
+import { AuthProvider } from "@/features/auth/auth-context";
 
 export const metadata: Metadata = {
   title: {
@@ -22,7 +23,9 @@ export default function RootLayout({
       {/* 최소 뷰포트 1280 — 반응형 없이 가로 스크롤 허용 (03 §1) */}
       <body className="min-w-min-viewport min-h-full bg-page-bg font-sans text-body text-fg-body">
         <Providers>
-          <ToastProvider>{children}</ToastProvider>
+          <AuthProvider>
+            <ToastProvider>{children}</ToastProvider>
+          </AuthProvider>
         </Providers>
       </body>
     </html>
