@@ -1,4 +1,5 @@
 import {
+  API_ERROR_CODES,
   ApiError,
   ApiErrorBody,
   ApiSuccessBody,
@@ -9,16 +10,25 @@ const BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:8080/api/v1";
 
 /**
- * 인증 연동 지점 (US-AUTH-03에서 구현).
+ * 인증 연동 지점 — 구현체는 features/auth/token-manager가 등록한다 (US-AUTH-03).
  * - accessToken 공급자: 등록돼 있으면 모든 요청에 Bearer 헤더를 붙인다.
- * - 401 핸들러: 응답이 401일 때 호출된다. AUTH 단계에서 TOKEN_EXPIRED 재발급 →
- *   원 요청 재시도(single-flight)로 교체될 뼈대. 지금은 등록된 콜백 호출 후 에러를 그대로 던진다.
+ * - 토큰 갱신 핸들러: `401 TOKEN_EXPIRED` 응답 시 호출된다(스펙 2.5 — 재발급 후 원 요청
+ *   재시도). 새 액세스 토큰을 반환하면 원 요청을 **1회만** 재시도한다. single-flight
+ *   보장은 핸들러 구현 쪽 책임이다.
+ * - 401 핸들러: 재발급으로 복구되지 않는 401에서 호출된다 (세션 정리용).
  */
 let accessTokenProvider: (() => string | null) | null = null;
+let tokenRefreshHandler: (() => Promise<string | null>) | null = null;
 let unauthorizedHandler: ((error: ApiError) => void) | null = null;
 
 export function setAccessTokenProvider(provider: (() => string | null) | null) {
   accessTokenProvider = provider;
+}
+
+export function setTokenRefreshHandler(
+  handler: (() => Promise<string | null>) | null,
+) {
+  tokenRefreshHandler = handler;
 }
 
 export function setUnauthorizedHandler(
@@ -55,6 +65,7 @@ async function request<T>(
   method: string,
   path: string,
   options: RequestOptions = {},
+  isRetryAfterRefresh = false,
 ): Promise<T> {
   const { query, body, signal } = options;
   // 호출자가 넘긴 headers 객체를 변형하지 않도록 복사본에만 쓴다
@@ -103,6 +114,17 @@ async function request<T>(
       errorBody.error?.message ?? "요청 처리 중 오류가 발생했습니다.",
       errorBody.error?.details,
     );
+    // TOKEN_EXPIRED → 재발급 → 원 요청 1회 재시도 (스펙 2.5). 재시도의 재시도는 없다 —
+    // 새 토큰으로도 만료가 나온다면 반복해도 결과가 같다.
+    if (
+      response.status === 401 &&
+      error.code === API_ERROR_CODES.TOKEN_EXPIRED &&
+      tokenRefreshHandler &&
+      !isRetryAfterRefresh
+    ) {
+      const renewedToken = await tokenRefreshHandler();
+      if (renewedToken !== null) return request<T>(method, path, options, true);
+    }
     if (response.status === 401) unauthorizedHandler?.(error);
     throw error;
   }

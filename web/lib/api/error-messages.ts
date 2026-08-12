@@ -19,6 +19,14 @@ const MESSAGES: Record<string, string> = {
     "서버 응답을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.",
 };
 
+/**
+ * 도메인 에러 코드의 표시 문구 등록 — 각 feature가 모듈 로드 시 1회 호출한다
+ * (예: features/auth/messages.ts). 같은 코드를 다시 등록하면 나중 것이 이긴다.
+ */
+export function extendErrorMessages(messages: Record<string, string>) {
+  Object.assign(MESSAGES, messages);
+}
+
 export function userMessageOf(error: unknown): string {
   if (error instanceof ApiError) {
     return MESSAGES[error.code] ?? "요청 처리 중 오류가 발생했습니다.";
