@@ -128,7 +128,7 @@ async function request<T>(
   return (json as ApiSuccessBody<T>).data;
 }
 
-/** 도메인 훅 레이어에서만 사용한다 — 컴포넌트에서 직접 호출 금지 (AGENTS.md) */
+/** 도메인 훅 레이어에서만 사용한다 — 컴포넌트에서 직접 호출 금지 (CLAUDE.md) */
 export const api = {
   get: <T>(path: string, options?: RequestOptions) =>
     request<T>("GET", path, options),

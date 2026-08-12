@@ -1,6 +1,6 @@
 # features/ — 도메인별 View/로직 분리 구조
 
-AGENTS.md의 View/로직 분리 원칙에 따라 도메인 코드는 여기에 둔다.
+CLAUDE.md 구현 원칙 1(View/로직 분리)에 따라 도메인 코드는 여기에 둔다.
 
 ```
 features/<도메인>/
