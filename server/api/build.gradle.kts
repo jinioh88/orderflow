@@ -6,11 +6,15 @@ plugins {
 // JWT: jjwt — 표준 클레임 API·서명 검증이 안정적이고 Boot 의존성과 충돌 없음 (0.12.x)
 val jjwtVersion = "0.12.6"
 
+// 엑셀: Apache POI — 선정 근거는 study/excel-library.md (US-CAT-02·03)
+val poiVersion = "5.4.1"
+
 dependencies {
     "implementation"(project(":infra"))
     "implementation"("org.springframework.boot:spring-boot-starter-webmvc")
     "implementation"("org.springframework.boot:spring-boot-starter-validation")
     "implementation"("org.springframework.boot:spring-boot-starter-security")
+    "implementation"("org.apache.poi:poi-ooxml:$poiVersion")
     "implementation"("io.jsonwebtoken:jjwt-api:$jjwtVersion")
     "runtimeOnly"("io.jsonwebtoken:jjwt-impl:$jjwtVersion")
     "runtimeOnly"("io.jsonwebtoken:jjwt-jackson:$jjwtVersion")

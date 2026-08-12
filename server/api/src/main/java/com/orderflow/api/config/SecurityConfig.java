@@ -58,6 +58,11 @@ public class SecurityConfig {
                         .hasAnyRole("HQ_ADMIN", "SYSTEM")
                         .requestMatchers("/api/v1/stores/**").hasRole("HQ_ADMIN")
                         .requestMatchers("/api/v1/users/**").hasRole("HQ_ADMIN")
+                        // api-spec 3.2 접근 매트릭스 — excel은 GET /products/*보다 먼저 매칭해야 HQ 전용이 된다
+                        .requestMatchers("/api/v1/products/excel").hasAnyRole("HQ_ADMIN", "HQ_MANAGER")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/products", "/api/v1/products/*")
+                        .hasAnyRole("HQ_ADMIN", "HQ_MANAGER", "STORE_OWNER")
+                        .requestMatchers("/api/v1/products/**").hasAnyRole("HQ_ADMIN", "HQ_MANAGER")
                         .anyRequest().authenticated())
                 .exceptionHandling(handling -> handling
                         .authenticationEntryPoint(authenticationEntryPoint(errorWriter))
