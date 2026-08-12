@@ -44,8 +44,8 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/settlements", label: "정산·미수금", icon: Wallet, milestone: "M4", enabled: false, roles: HQ_ROLES },
   // GET /stores — HQ_ADMIN, HQ_MANAGER (2.4.7)
   { href: "/stores", label: "가맹점", icon: Store, milestone: "M1", enabled: true, roles: HQ_ROLES },
-  // 계정 관리 화면은 US-AUTH-02 착수 시 라우트와 함께 켠다 — GET /users (2.4.11)
-  { href: "/accounts", label: "계정 관리", icon: Users, milestone: "M1", enabled: false, roles: HQ_ROLES },
+  // 별도 메뉴로 확정 (사용자 결정 2026-08-12) — GET /users (2.4.11)
+  { href: "/accounts", label: "계정 관리", icon: Users, milestone: "M1", enabled: true, roles: HQ_ROLES },
 ];
 
 export function visibleNavItemsFor(role: Role | null): NavItem[] {
