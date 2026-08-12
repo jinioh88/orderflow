@@ -9,7 +9,6 @@ import com.orderflow.api.catalog.dto.CatalogDtos.ProductUpdateRequest;
 import com.orderflow.api.common.response.ApiResponse;
 import com.orderflow.api.common.response.PageResponse;
 import com.orderflow.api.common.web.PageRequests;
-import com.orderflow.domain.catalog.ProductStatus;
 import com.orderflow.infra.catalog.ProductSearchCondition;
 import com.orderflow.infra.catalog.ProductSummary;
 import jakarta.validation.Valid;
@@ -26,7 +25,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -49,15 +47,12 @@ public class ProductController {
         return ApiResponse.of(productService.register(principal, request));
     }
 
+    /** 검색 조건은 레코드 생성자 바인딩 — 다운로드(3.3.3)와 같은 필터를 공유한다 */
     @GetMapping("/api/v1/products")
-    public ApiResponse<PageResponse<ProductResponse>> list(@RequestParam(required = false) String keyword,
-                                                           @RequestParam(required = false) String category,
-                                                           @RequestParam(required = false) ProductStatus status,
-                                                           @RequestParam(required = false) Boolean limited,
+    public ApiResponse<PageResponse<ProductResponse>> list(ProductSearchCondition condition,
                                                            Pageable pageable) {
         Pageable resolved = PageRequests.resolve(pageable, SORT_FIELDS, DEFAULT_SORT);
-        Page<ProductSummary> page = productService.list(
-                new ProductSearchCondition(keyword, category, status, limited), resolved);
+        Page<ProductSummary> page = productService.list(condition, resolved);
         return ApiResponse.of(PageResponse.of(
                 page.getContent().stream().map(ProductResponse::from).toList(),
                 page.getNumber(), page.getSize(), page.getTotalElements()));

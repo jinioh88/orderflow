@@ -6,7 +6,6 @@ import com.orderflow.api.catalog.excel.ExcelParseException;
 import com.orderflow.api.catalog.excel.ProductExcelWriter;
 import com.orderflow.api.common.response.ApiResponse;
 import com.orderflow.api.common.response.KstTimes;
-import com.orderflow.domain.catalog.ProductStatus;
 import com.orderflow.infra.catalog.ProductSearchCondition;
 import com.orderflow.infra.catalog.ProductSummary;
 import java.io.ByteArrayOutputStream;
@@ -55,12 +54,8 @@ public class ProductExcelController {
      * 캡되어 있어 메모리 확정이 안전하고, 워크북 생성은 SXSSF 스트리밍으로 낮은 메모리를 유지한다.
      */
     @GetMapping("/api/v1/products/excel")
-    public ResponseEntity<byte[]> download(@RequestParam(required = false) String keyword,
-                                           @RequestParam(required = false) String category,
-                                           @RequestParam(required = false) ProductStatus status,
-                                           @RequestParam(required = false) Boolean limited) {
-        List<ProductSummary> products = productExcelService.findAllForDownload(
-                new ProductSearchCondition(keyword, category, status, limited));
+    public ResponseEntity<byte[]> download(ProductSearchCondition condition) {
+        List<ProductSummary> products = productExcelService.findAllForDownload(condition);
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         productExcelWriter.write(products, out);
         String filename = "products-%s.xlsx".formatted(

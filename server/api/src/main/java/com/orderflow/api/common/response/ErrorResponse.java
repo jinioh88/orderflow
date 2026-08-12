@@ -15,9 +15,8 @@ public record ErrorResponse(ErrorBody error) {
     public record ErrorBody(String code, String message, List<FieldError> details) {
     }
 
-    /** row는 엑셀 행 오류(api-spec 3.3.2)만 사용 — 일반 필드 오류에서는 직렬화되지 않는다 */
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    public record FieldError(Integer row, String field, String reason) {
+    /** row는 엑셀 행 오류(api-spec 3.3.2)만 사용 — 일반 필드 오류에서는 직렬화되지 않는다 (field·reason은 항상 직렬화) */
+    public record FieldError(@JsonInclude(JsonInclude.Include.NON_NULL) Integer row, String field, String reason) {
 
         public static FieldError of(String field, String reason) {
             return new FieldError(null, field, reason);

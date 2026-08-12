@@ -52,8 +52,9 @@ public class ProductExcelService {
                         command.orderUnit(), command.unitPrice()));
             } else {
                 // 기존 상품은 더티 체킹으로 갱신 — 상태·한정 지정은 업로드로 바뀌지 않는다 (api-spec 3.3.2)
-                existingByCode.get(command.productCode()).update(command.name(), command.barcode(),
-                        command.category(), command.orderUnit(), command.unitPrice());
+                existingByCode.get(ProductExcelValidator.caseKey(command.productCode()))
+                        .update(command.name(), command.barcode(),
+                                command.category(), command.orderUnit(), command.unitPrice());
             }
         }
         return new ExcelUploadResponse(
@@ -66,17 +67,24 @@ public class ProductExcelService {
         return productQueryRepository.findAllForExcel(condition);
     }
 
-    /** 행당 쿼리 금지 — 파일의 품목코드·바코드를 벌크로 한 번에 조회한다 */
+    /**
+     * 행당 쿼리 금지 — 파일의 품목코드·바코드를 벌크로 한 번에 조회한다.
+     * 맵 키는 caseKey 정규화 — DB 조회(ai_ci)는 대소문자 무시로 매칭되므로 Java 측 분류도 맞춘다.
+     */
     private Map<String, Product> existingByProductCode(List<ProductExcelRow> rows) {
         Set<String> codes = nonBlank(rows, ProductExcelRow::productCode);
         return codes.isEmpty() ? Map.of() : productRepository.findAllByProductCodeIn(codes).stream()
-                .collect(Collectors.toMap(Product::getProductCode, Function.identity()));
+                .collect(Collectors.toMap(
+                        product -> ProductExcelValidator.caseKey(product.getProductCode()),
+                        Function.identity()));
     }
 
     private Map<String, String> existingBarcodeOwners(List<ProductExcelRow> rows) {
         Set<String> barcodes = nonBlank(rows, ProductExcelRow::barcode);
         return barcodes.isEmpty() ? Map.of() : productRepository.findAllByBarcodeIn(barcodes).stream()
-                .collect(Collectors.toMap(Product::getBarcode, Product::getProductCode));
+                .collect(Collectors.toMap(
+                        product -> ProductExcelValidator.caseKey(product.getBarcode()),
+                        product -> ProductExcelValidator.caseKey(product.getProductCode())));
     }
 
     private Set<String> nonBlank(List<ProductExcelRow> rows, Function<ProductExcelRow, String> extractor) {

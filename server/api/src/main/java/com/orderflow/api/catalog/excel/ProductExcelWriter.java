@@ -50,11 +50,13 @@ public class ProductExcelWriter {
         row.createCell(ProductExcelLayout.COL_BARCODE).setCellValue(product.barcode());
         row.createCell(ProductExcelLayout.COL_CATEGORY).setCellValue(product.category());
         row.createCell(ProductExcelLayout.COL_ORDER_UNIT).setCellValue(product.orderUnit());
-        row.createCell(ProductExcelLayout.COL_UNIT_PRICE).setCellValue(product.unitPrice().longValueExact());
-        row.createCell(6).setCellValue(product.limited() ? "Y" : "N");
+        // doubleValue — 도메인이 허용하는 소수 2자리 단가도 500 없이 내보낸다 (DECIMAL(15,2)는 double로 정확)
+        row.createCell(ProductExcelLayout.COL_UNIT_PRICE).setCellValue(product.unitPrice().doubleValue());
+        row.createCell(ProductExcelLayout.COL_LIMITED).setCellValue(product.limited() ? "Y" : "N");
         if (product.availableQty() != null) {
-            row.createCell(7).setCellValue(product.availableQty());
+            row.createCell(ProductExcelLayout.COL_AVAILABLE_QTY).setCellValue(product.availableQty());
         }
-        row.createCell(8).setCellValue(product.status() == ProductStatus.ON_SALE ? "판매중" : "판매중지");
+        row.createCell(ProductExcelLayout.COL_STATUS)
+                .setCellValue(product.status() == ProductStatus.ON_SALE ? "판매중" : "판매중지");
     }
 }

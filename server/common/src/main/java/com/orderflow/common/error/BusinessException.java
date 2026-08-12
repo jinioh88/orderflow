@@ -1,5 +1,6 @@
 package com.orderflow.common.error;
 
+import java.util.List;
 import lombok.Getter;
 
 /**
@@ -18,5 +19,14 @@ public class BusinessException extends RuntimeException {
     public BusinessException(ErrorCode errorCode, String message) {
         super(message);
         this.errorCode = errorCode;
+    }
+
+    /**
+     * 항목 단위 오류 목록 — 있으면 에러 응답 details로 직렬화된다 (api-spec 1.3).
+     * 구조화된 오류를 가진 예외(엑셀 행 오류 등)가 재정의한다 — 공통 핸들러에
+     * 기능별 분기를 두지 않기 위한 확장점.
+     */
+    public List<ErrorDetail> details() {
+        return List.of();
     }
 }

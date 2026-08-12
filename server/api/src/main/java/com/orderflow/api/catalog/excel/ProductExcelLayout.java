@@ -21,6 +21,10 @@ public final class ProductExcelLayout {
     public static final int COL_CATEGORY = 3;
     public static final int COL_ORDER_UNIT = 4;
     public static final int COL_UNIT_PRICE = 5;
+    // 다운로드 전용 (업로드는 무시)
+    public static final int COL_LIMITED = 6;
+    public static final int COL_AVAILABLE_QTY = 7;
+    public static final int COL_STATUS = 8;
 
     /** 최대 데이터 행 수 — 초과 시 EXCEL_FILE_INVALID (api-spec 3.3.1) */
     public static final int MAX_DATA_ROWS = 10_000;

@@ -146,6 +146,20 @@ class ProductExcelValidationTest {
         }
 
         @Test
+        @DisplayName("품목코드·바코드 비교는 대소문자를 무시한다 — DB 유니크(ai_ci)와 일치 (CAT-3 리뷰 회귀)")
+        void matchesCaseInsensitively() {
+            var result = validate(List.of(
+                            normalRow("p-0001", "8801111111111"),   // 기존 P-0001의 소문자 표기 → 수정
+                            normalRow("P-0002", "8802222222222"),
+                            normalRow("p-0002", "8803333333333")),  // 3행과 대소문자만 다른 중복
+                    Set.of("P-0001"), Map.of("8801111111111", "P-0001"));
+
+            assertThat(result.errors()).containsExactly(
+                    new ExcelRowError(4, "productCode", "파일 내 품목코드가 중복됩니다 (3행과 동일)."));
+            assertThat(result.updatedCount()).isEqualTo(1); // p-0001은 신규가 아니라 수정
+        }
+
+        @Test
         @DisplayName("DB의 다른 상품 바코드와 충돌하면 오류, 자기(같은 품목코드) 바코드는 정상")
         void reportsDbBarcodeConflict() {
             var result = validate(List.of(

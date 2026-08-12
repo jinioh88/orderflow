@@ -1,6 +1,5 @@
 package com.orderflow.api.common.error;
 
-import com.orderflow.api.catalog.excel.ExcelValidationException;
 import com.orderflow.api.common.response.ErrorResponse;
 import com.orderflow.common.error.BusinessException;
 import com.orderflow.common.error.CatalogErrorCode;
@@ -29,30 +28,23 @@ import java.util.List;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    /** 예외가 details를 실어 오면(엑셀 행 오류 등) 그대로 직렬화한다 — 기능별 핸들러 분기 없음 */
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ErrorResponse> handleBusiness(BusinessException e) {
         ErrorCode errorCode = e.getErrorCode();
-        return ResponseEntity.status(errorCode.status())
-                .body(ErrorResponse.of(errorCode, e.getMessage()));
-    }
-
-    /** 엑셀 행 오류 — details를 {row, field, reason}으로 확장한다 (api-spec 3.3.2) */
-    @ExceptionHandler(ExcelValidationException.class)
-    public ResponseEntity<ErrorResponse> handleExcelValidation(ExcelValidationException e) {
-        List<ErrorResponse.FieldError> details = e.getErrors().stream()
-                .map(rowError -> ErrorResponse.FieldError.of(
-                        rowError.row(), rowError.field(), rowError.reason()))
+        List<ErrorResponse.FieldError> details = e.details().stream()
+                .map(detail -> new ErrorResponse.FieldError(detail.row(), detail.field(), detail.reason()))
                 .toList();
-        return ResponseEntity.status(e.getErrorCode().status())
+        return ResponseEntity.status(errorCode.status())
                 .body(new ErrorResponse(new ErrorResponse.ErrorBody(
-                        e.getErrorCode().code(), e.getMessage(), details)));
+                        errorCode.code(), e.getMessage(), details.isEmpty() ? null : details)));
     }
 
-    /** 업로드 용량 초과 — 스펙상 10MB 초과는 EXCEL_FILE_INVALID (api-spec 3.3.1) */
+    /** 업로드 용량 초과 — 스펙상 상한 초과는 EXCEL_FILE_INVALID (api-spec 3.3.1). 상한 수치는 설정 소관이라 재기술하지 않는다 */
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ResponseEntity<ErrorResponse> handleMaxUploadSize(MaxUploadSizeExceededException e) {
         return ResponseEntity.status(CatalogErrorCode.EXCEL_FILE_INVALID.status())
-                .body(ErrorResponse.of(CatalogErrorCode.EXCEL_FILE_INVALID, "파일이 최대 10MB를 초과했습니다."));
+                .body(ErrorResponse.of(CatalogErrorCode.EXCEL_FILE_INVALID, "업로드 용량 제한을 초과했습니다."));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
