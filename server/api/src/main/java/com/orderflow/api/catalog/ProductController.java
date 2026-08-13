@@ -12,6 +12,7 @@ import com.orderflow.api.common.web.PageRequests;
 import com.orderflow.infra.catalog.ProductSearchCondition;
 import com.orderflow.infra.catalog.ProductSummary;
 import jakarta.validation.Valid;
+import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -29,7 +30,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * 상품 카탈로그 엔드포인트 (api-spec 3.2.1~3.2.8)
+ * 상품 카탈로그 엔드포인트 (api-spec 3.2.1~3.2.8, 3.2.11)
  */
 @RestController
 @RequiredArgsConstructor
@@ -56,6 +57,16 @@ public class ProductController {
         return ApiResponse.of(PageResponse.of(
                 page.getContent().stream().map(ProductResponse::from).toList(),
                 page.getNumber(), page.getSize(), page.getTotalElements()));
+    }
+
+    /**
+     * 카테고리 칩 UI용 목록 (api-spec 3.2.11).
+     * 리터럴 경로라 아래 {@code /{productId}}(3.2.3)보다 우선 매칭된다 — 스프링의 패턴 우선순위에 의존하므로
+     * 회귀 테스트로 고정해 뒀다 (뒤집히면 "categories"를 Long으로 변환하려다 400이 나간다).
+     */
+    @GetMapping("/api/v1/products/categories")
+    public ApiResponse<List<String>> categories() {
+        return ApiResponse.of(productService.listUsedCategories());
     }
 
     @GetMapping("/api/v1/products/{productId}")
