@@ -17,6 +17,7 @@ import com.orderflow.infra.catalog.ProductQueryRepository;
 import com.orderflow.infra.catalog.ProductSearchCondition;
 import com.orderflow.infra.catalog.ProductSummary;
 import java.math.BigDecimal;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -51,6 +52,12 @@ public class ProductService {
     @Transactional(readOnly = true)
     public Page<ProductSummary> list(ProductSearchCondition condition, Pageable pageable) {
         return productQueryRepository.search(condition, pageable);
+    }
+
+    /** 카테고리 칩 UI용 목록 (api-spec 3.2.11) */
+    @Transactional(readOnly = true)
+    public List<String> listUsedCategories() {
+        return productQueryRepository.findUsedCategories();
     }
 
     @Transactional(readOnly = true)

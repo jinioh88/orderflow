@@ -3,6 +3,7 @@ package com.orderflow.infra.catalog;
 import static com.orderflow.domain.catalog.QHqStock.hqStock;
 import static com.orderflow.domain.catalog.QProduct.product;
 
+import com.orderflow.domain.catalog.ProductStatus;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -47,6 +48,20 @@ public class ProductQueryRepository {
                     .fetchOne();
             return total == null ? 0 : total;
         });
+    }
+
+    /**
+     * 사용 중인 카테고리 목록 (api-spec 3.2.11) — 카테고리 칩 UI용.
+     * 판매중 상품이 있는 카테고리만 반환한다 (칩을 눌렀을 때 빈 목록이 되지 않게).
+     * 테넌트 조건은 쓰지 않는다 — Hibernate 필터가 강제한다 (클래스 주석 참조).
+     */
+    public List<String> findUsedCategories() {
+        return queryFactory
+                .selectDistinct(product.category)
+                .from(product)
+                .where(product.status.eq(ProductStatus.ON_SALE))
+                .orderBy(product.category.asc())
+                .fetch();
     }
 
     /** 엑셀 다운로드용 전체 조회 — 페이징 없음, 품목코드 오름차순 고정 (api-spec 3.3.3) */
