@@ -9,14 +9,13 @@ final class Paged<T> {
   factory Paged.fromJson(
     Map<String, dynamic> json,
     T Function(Map<String, dynamic>) fromItem,
-  ) =>
-      Paged(
-        items: (json['items'] as List? ?? const [])
-            .whereType<Map<String, dynamic>>()
-            .map(fromItem)
-            .toList(),
-        page: PageInfo.fromJson(json['page'] as Map<String, dynamic>? ?? const {}),
-      );
+  ) => Paged(
+    items: (json['items'] as List? ?? const [])
+        .whereType<Map<String, dynamic>>()
+        .map(fromItem)
+        .toList(),
+    page: PageInfo.fromJson(json['page'] as Map<String, dynamic>? ?? const {}),
+  );
 
   final List<T> items;
   final PageInfo page;
@@ -34,11 +33,11 @@ final class PageInfo {
   });
 
   factory PageInfo.fromJson(Map<String, dynamic> json) => PageInfo(
-        number: json['number'] as int? ?? 0,
-        size: json['size'] as int? ?? 0,
-        totalElements: json['totalElements'] as int? ?? 0,
-        totalPages: json['totalPages'] as int? ?? 0,
-      );
+    number: json['number'] as int? ?? 0,
+    size: json['size'] as int? ?? 0,
+    totalElements: json['totalElements'] as int? ?? 0,
+    totalPages: json['totalPages'] as int? ?? 0,
+  );
 
   final int number;
   final int size;
