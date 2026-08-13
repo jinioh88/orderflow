@@ -62,8 +62,9 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
 
-  // 볼 수 있는 메뉴가 하나도 없는 역할(점주 등이 웹에 로그인) — 리다이렉트할 홈이
-  // 없으므로 홈으로 보내면 무한 루프다. 안내 화면 + 로그아웃만 제공한다.
+  // 볼 수 있는 메뉴가 하나도 없는 역할 — 로그인 단계에서 차단되지만(use-login),
+  // 세션 유지 중 역할이 바뀌는 등의 잔여 경로를 위한 안전망이다. 리다이렉트할 홈이
+  // 없어 홈으로 보내면 무한 루프이므로 안내 화면 + 로그아웃만 제공한다.
   const noAccess = ready && visibleNavItemsFor(role).length === 0;
 
   // 역할 밖 메뉴로 직접 진입하면 홈으로 (메뉴 숨김만으로는 URL 입력을 못 막는다)

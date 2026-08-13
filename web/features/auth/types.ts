@@ -70,6 +70,15 @@ export interface JwtClaims {
   exp: number;
 }
 
+/**
+ * 클라이언트에서 합성하는 AUTH 코드 — 서버 응답이 아니다.
+ * 웹 접근 불가 역할(점주 등)의 로그인은 성공 응답을 받아도 세션을 만들지 않고
+ * 이 코드로 실패 처리한다 (사용자 결정 2026-08-13).
+ */
+export const AUTH_CLIENT_ERROR_CODES = {
+  WEB_ACCESS_DENIED: "WEB_ACCESS_DENIED",
+} as const;
+
 /** AUTH 에픽이 추가하는 에러 코드 (스펙 2.5) */
 export const AUTH_ERROR_CODES = {
   INVALID_CREDENTIALS: "INVALID_CREDENTIALS",

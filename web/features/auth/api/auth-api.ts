@@ -29,12 +29,22 @@ export function setPasswordApi(
   return api.put<SetPasswordResponse>("/users/me/password", { body });
 }
 
-/** POST /auth/logout — 이미 무효한 토큰이어도 204 멱등 (스펙 2.4.5) */
-export function logoutApi(refreshToken: string): Promise<void> {
+/**
+ * POST /auth/logout — 이미 무효한 토큰이어도 204 멱등 (스펙 2.4.5).
+ * `accessToken`은 세션을 시작하지 않은 채 토큰을 무효화할 때(웹 접근 불가 역할의
+ * 로그인 차단)만 넘긴다 — 저장된 세션이 없어 공급자가 Bearer를 못 붙이는 경우다.
+ */
+export function logoutApi(
+  refreshToken: string,
+  accessToken?: string,
+): Promise<void> {
   return api.post<void>("/auth/logout", {
     body: { refreshToken },
     // 자동 재시도 금지: 재발급으로 회전된 뒤 옛 토큰을 다시 보내면 새 토큰이
     // 서버에 살아남는다 — 만료 대비는 useLogout이 선제 재발급으로 처리한다
     skipAuthRetry: true,
+    ...(accessToken
+      ? { headers: { Authorization: `Bearer ${accessToken}` } }
+      : {}),
   });
 }
