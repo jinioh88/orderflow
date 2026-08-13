@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   AllCommunityModule,
   ModuleRegistry,
@@ -85,6 +85,9 @@ export function DataGrid<T>({
         datasource={datasource}
         // 블록 = 서버 페이징 1페이지. 스펙 1.5 최대 size(100)에 맞춘다
         cacheBlockSize={100}
+        // 공통 페이징(1.5)의 sort는 단일 필드다. 다중 정렬을 열어 두면 헤더에는 2차
+        // 정렬 표시가 뜨는데 서버는 1차만 적용해 표시와 실제 순서가 어긋난다.
+        suppressMultiSort
         // 뒤로 스크롤한 블록도 유지 — 목록 왕복 시 재요청 방지 (필터 변경 시엔 datasource 교체로 초기화)
         maxBlocksInCache={20}
         cellSelection={false}
@@ -110,34 +113,72 @@ export function useServerDatasource<T>(
     size: number,
     sort: SortModelItem | undefined,
   ) => Promise<PageResponse<T>>,
-  onError?: (error: unknown) => void,
-): { datasource: IDatasource; totalElements: number | null } {
-  const [totalElements, setTotalElements] = useState<number | null>(null);
+  /** `retry`는 실패한 블록을 다시 불러온다 — 에러 표시에 재시도 수단을 반드시 준다 (02 §2.3) */
+  onError?: (error: unknown, retry: () => void) => void,
+): {
+  datasource: IDatasource;
+  totalElements: number | null;
+  onGridReady: (event: GridReadyEvent) => void;
+} {
+  const gridApiRef = useRef<GridApi | null>(null);
   // 콜백 최신값 참조 (datasource 재생성은 fetchPage 변경에만 반응)
   const onErrorRef = useRef(onError);
   useEffect(() => {
     onErrorRef.current = onError;
   });
 
+  /**
+   * 지금 살아 있는 datasource 식별자. datasource는 `fetchPage` 1:1이므로 이것으로 판별한다.
+   * 필터를 바꾸면 옛 datasource의 요청이 뒤늦게 도착할 수 있는데, 그 응답으로 총 건수를
+   * 덮거나(필터 결과 3건 옆에 "총 1,000건") 엉뚱한 에러 토스트를 띄우면 안 된다.
+   */
+  const activeFetchPageRef = useRef(fetchPage);
+  useEffect(() => {
+    activeFetchPageRef.current = fetchPage;
+  }, [fetchPage]);
+
+  // 건수는 "어느 조건의 결과인지"와 함께 들고, 표시값은 파생시킨다 —
+  // 조건이 바뀌면 새 응답이 오기 전까지 자동으로 null(=미정)이 된다.
+  const [counted, setCounted] = useState<{
+    source: typeof fetchPage;
+    total: number;
+  } | null>(null);
+  const totalElements = counted?.source === fetchPage ? counted.total : null;
+
   const datasource = useMemo<IDatasource>(() => {
+    const ownFetchPage = fetchPage;
+    const isStale = () => activeFetchPageRef.current !== ownFetchPage;
     return {
       getRows: (params) => {
         const size = params.endRow - params.startRow;
         const page = Math.floor(params.startRow / size);
-        fetchPage(page, size, params.sortModel[0])
+        ownFetchPage(page, size, params.sortModel[0])
           .then((result) => {
-            setTotalElements(result.page.totalElements);
+            if (isStale()) return;
+            setCounted({
+              source: ownFetchPage,
+              total: result.page.totalElements,
+            });
             params.successCallback(result.items, result.page.totalElements);
           })
           .catch((error) => {
-            onErrorRef.current?.(error);
+            if (isStale()) return;
+            // 실패한 블록은 캐시에 '실패'로 남아 스크롤을 오가도 재요청되지 않는다.
+            // 되살리는 유일한 방법이 캐시 새로고침이므로 retry로 함께 넘긴다.
             params.failCallback();
+            onErrorRef.current?.(error, () =>
+              gridApiRef.current?.refreshInfiniteCache(),
+            );
           });
       },
     };
   }, [fetchPage]);
 
-  return { datasource, totalElements };
+  const onGridReady = useCallback((event: GridReadyEvent) => {
+    gridApiRef.current = event.api;
+  }, []);
+
+  return { datasource, totalElements, onGridReady };
 }
 
 export type { ColDef, GridApi, IDatasource, SortModelItem };

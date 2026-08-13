@@ -74,7 +74,8 @@ const COLUMN_DEFS: ColDef<Product>[] = [
 ];
 
 export function ProductsView() {
-  const { filters, setFilters, datasource, totalElements } = useProductsGrid();
+  const { filters, setFilters, datasource, totalElements, onGridReady } =
+    useProductsGrid();
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-4">
@@ -123,7 +124,11 @@ export function ProductsView() {
         </p>
       </div>
       <div className="min-h-0 flex-1 overflow-hidden rounded-lg border border-border bg-surface">
-        <DataGrid<Product> columnDefs={COLUMN_DEFS} datasource={datasource} />
+        <DataGrid<Product>
+          columnDefs={COLUMN_DEFS}
+          datasource={datasource}
+          onGridReady={onGridReady}
+        />
       </div>
     </div>
   );
