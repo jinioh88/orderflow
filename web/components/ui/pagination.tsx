@@ -1,8 +1,25 @@
 "use client";
 
+import { useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { PageResponse } from "@/lib/api/types";
 import { Button } from "./button";
+
+/**
+ * 페이지 범위 보정 — 마지막 페이지의 유일한 행을 삭제(비활성화·필터 변경)한 뒤의 재조회가
+ * 범위 밖 페이지를 가리키면 "결과 없음"으로 오인되므로, 응답이 올 때마다 마지막
+ * 유효 페이지로 되돌린다.
+ */
+export function usePageClamp(
+  page: PageResponse<unknown>["page"] | undefined,
+  setPage: (page: number) => void,
+) {
+  useEffect(() => {
+    if (!page) return;
+    const lastPage = Math.max(page.totalPages - 1, 0);
+    if (page.number > lastPage) setPage(lastPage);
+  }, [page, setPage]);
+}
 
 /**
  * 목록 하단 페이지네이션 — 공통 페이징 규약(스펙 1.5)의 `page` 응답을 그대로 받는다.

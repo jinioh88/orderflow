@@ -6,11 +6,11 @@ import { cn } from "@/lib/utils/cn";
 import { Button } from "./button";
 
 /**
- * 범용 모달 (03-web-components §6.1).
+ * 범용 모달 (03-web-components §6.1). `ConfirmDialog`도 이 위에서 구현된다.
  * 폭 sm 400 / md 560 / lg 720, surface + radius-lg + shadow-3, 오버레이 neutral-900 50%.
  * 구조: 헤더(heading + 닫기 X) / 본문(패딩 24) / 푸터(우측 정렬 — 호출부가 children으로 구성).
  * ESC·오버레이 클릭 닫기 허용, 단 진행 중(closeDisabled)에는 닫지 않는다.
- * 확인 전용 다이얼로그는 `ConfirmDialog`를 쓴다 — 이건 폼 등 임의 콘텐츠용.
+ * 초기 포커스: `[data-autofocus]`가 있으면 그 요소, 없으면 첫 포커스 가능 요소.
  */
 
 const SIZE_CLASS = { sm: "w-100", md: "w-140", lg: "w-180" } as const;
@@ -40,17 +40,28 @@ export function Modal({
   children,
 }: ModalProps) {
   const panelRef = useRef<HTMLDivElement>(null);
+  // 콜백·플래그는 ref로 참조한다 — 이펙트 의존성에 넣으면 호출부가 매 렌더 새로 만드는
+  // onClose 때문에 키 입력마다 이펙트가 재실행되어 입력 중인 필드의 포커스를 뺏는다.
+  const onCloseRef = useRef(onClose);
+  const closeDisabledRef = useRef(closeDisabled);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+    closeDisabledRef.current = closeDisabled;
+  });
 
   useEffect(() => {
     if (!open) return;
     const panel = panelRef.current;
     const previouslyFocused = document.activeElement as HTMLElement | null;
-    panel?.querySelector<HTMLElement>(FOCUSABLE)?.focus();
+    const initial =
+      panel?.querySelector<HTMLElement>("[data-autofocus]") ??
+      panel?.querySelector<HTMLElement>(FOCUSABLE);
+    initial?.focus();
 
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         e.stopPropagation();
-        if (!closeDisabled) onClose();
+        if (!closeDisabledRef.current) onCloseRef.current();
         return;
       }
       // 포커스가 모달 밖으로 나가지 않게 Tab을 안에서 순환시킨다
@@ -77,7 +88,7 @@ export function Modal({
       document.removeEventListener("keydown", onKeyDown);
       previouslyFocused?.focus();
     };
-  }, [open, closeDisabled, onClose]);
+  }, [open]);
 
   if (!open) return null;
 

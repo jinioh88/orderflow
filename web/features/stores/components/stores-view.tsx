@@ -5,8 +5,9 @@ import { Plus, Store as StoreIcon } from "lucide-react";
 import { ActiveBadge } from "@/components/ui/active-badge";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorMessage } from "@/components/ui/error-message";
-import { Pagination } from "@/components/ui/pagination";
+import { Pagination, usePageClamp } from "@/components/ui/pagination";
 import { InlineSpinner, Skeleton } from "@/components/ui/spinner";
 import { useAuth } from "@/features/auth/auth-context";
 import { cn } from "@/lib/utils/cn";
@@ -36,6 +37,7 @@ export function StoresView() {
 
   const stores = useStores({ status, page, size: PAGE_SIZE });
   const deactivate = useDeactivateStore();
+  usePageClamp(stores.data?.page, setPage);
 
   const changeStatus = (next: StoreStatus | undefined) => {
     setStatus(next);
@@ -93,11 +95,32 @@ export function StoresView() {
               ) : stores.data.items.length === 0 ? (
                 <tr>
                   <td colSpan={isAdmin ? 5 : 4}>
-                    <EmptyState
-                      filtered={status !== undefined}
-                      onResetFilter={() => changeStatus(undefined)}
-                      onCreate={isAdmin ? () => setFormOpen(true) : undefined}
-                    />
+                    {status !== undefined ? (
+                      <EmptyState
+                        icon={StoreIcon}
+                        title="조건에 맞는 가맹점이 없습니다"
+                        description="상태 필터를 바꾸거나 초기화해 보세요."
+                        action={{
+                          label: "필터 초기화",
+                          onClick: () => changeStatus(undefined),
+                        }}
+                      />
+                    ) : (
+                      <EmptyState
+                        icon={StoreIcon}
+                        title="등록된 가맹점이 없습니다"
+                        description="가맹점을 등록하면 점주 계정을 발급할 수 있습니다."
+                        action={
+                          isAdmin
+                            ? {
+                                label: "가맹점 등록",
+                                onClick: () => setFormOpen(true),
+                                primary: true,
+                              }
+                            : undefined
+                        }
+                      />
+                    )}
                   </td>
                 </tr>
               ) : (
@@ -182,39 +205,3 @@ function SkeletonRows({ columns }: { columns: number }) {
   );
 }
 
-function EmptyState({
-  filtered,
-  onResetFilter,
-  onCreate,
-}: {
-  filtered: boolean;
-  onResetFilter: () => void;
-  onCreate?: () => void;
-}) {
-  return (
-    <div className="flex flex-col items-center gap-2 px-6 py-12 text-center">
-      <span className="text-[var(--core-color-neutral-300)]" aria-hidden>
-        <StoreIcon size={32} strokeWidth={1.5} />
-      </span>
-      <p className="text-heading text-fg-title">
-        {filtered ? "조건에 맞는 가맹점이 없습니다" : "등록된 가맹점이 없습니다"}
-      </p>
-      <p className="text-body-md text-fg-caption">
-        {filtered
-          ? "상태 필터를 바꾸거나 초기화해 보세요."
-          : "가맹점을 등록하면 점주 계정을 발급할 수 있습니다."}
-      </p>
-      {filtered ? (
-        <Button variant="secondary" size="lg" className="mt-2" onClick={onResetFilter}>
-          필터 초기화
-        </Button>
-      ) : (
-        onCreate && (
-          <Button variant="primary" size="lg" className="mt-2" onClick={onCreate}>
-            가맹점 등록
-          </Button>
-        )
-      )}
-    </div>
-  );
-}

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { InlineErrorMessage } from "@/components/ui/error-message";
 import { Input } from "@/components/ui/input";
 import { Modal } from "@/components/ui/modal";
 import { Select } from "@/components/ui/select";
@@ -183,23 +184,31 @@ export function AccountFormModal({
             {formError}
           </div>
         )}
-        <Select
-          id={FIELD_IDS.storeId}
-          label="소속 가맹점"
-          value={values.storeId}
-          error={fieldErrors.storeId}
-          disabled={stores.isPending}
-          onChange={(e) => handleChange("storeId", e.target.value)}
-        >
-          <option value="" disabled>
-            {stores.isPending ? "불러오는 중…" : "가맹점 선택"}
-          </option>
-          {stores.data?.items.map((store) => (
-            <option key={store.id} value={store.id}>
-              {store.name}
+        {stores.isError ? (
+          // 셀렉트가 빈 채로 서 있으면 사용자 입력 문제처럼 보인다 — 실패를 드러내고 재시도를 준다
+          <InlineErrorMessage
+            error={stores.error}
+            onRetry={() => stores.refetch()}
+          />
+        ) : (
+          <Select
+            id={FIELD_IDS.storeId}
+            label="소속 가맹점"
+            value={values.storeId}
+            error={fieldErrors.storeId}
+            disabled={stores.isPending}
+            onChange={(e) => handleChange("storeId", e.target.value)}
+          >
+            <option value="" disabled>
+              {stores.isPending ? "불러오는 중…" : "가맹점 선택"}
             </option>
-          ))}
-        </Select>
+            {stores.data?.items.map((store) => (
+              <option key={store.id} value={store.id}>
+                {store.name}
+              </option>
+            ))}
+          </Select>
+        )}
         <Input
           id={FIELD_IDS.email}
           label="이메일"

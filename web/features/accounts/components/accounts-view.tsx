@@ -5,8 +5,9 @@ import { KeyRound, Plus, Users as UsersIcon } from "lucide-react";
 import { ActiveBadge } from "@/components/ui/active-badge";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { EmptyState } from "@/components/ui/empty-state";
 import { ErrorMessage } from "@/components/ui/error-message";
-import { Pagination } from "@/components/ui/pagination";
+import { Pagination, usePageClamp } from "@/components/ui/pagination";
 import { InlineSpinner, Skeleton } from "@/components/ui/spinner";
 import { useAuth } from "@/features/auth/auth-context";
 import { ROLE_LABELS } from "@/features/auth/types";
@@ -55,6 +56,7 @@ export function AccountsView() {
   const stores = useStores({ size: 100 });
   const reissue = useReissueTemporaryPassword();
   const deactivate = useDeactivateAccount();
+  usePageClamp(accounts.data?.page, setPage);
 
   const storeNames = useMemo(() => {
     const map = new Map<number, string>();
@@ -123,11 +125,32 @@ export function AccountsView() {
               ) : accounts.data.items.length === 0 ? (
                 <tr>
                   <td colSpan={columnCount}>
-                    <EmptyState
-                      filtered={status !== undefined}
-                      onResetFilter={() => changeStatus(undefined)}
-                      onCreate={isAdmin ? () => setFormOpen(true) : undefined}
-                    />
+                    {status !== undefined ? (
+                      <EmptyState
+                        icon={UsersIcon}
+                        title="조건에 맞는 계정이 없습니다"
+                        description="상태 필터를 바꾸거나 초기화해 보세요."
+                        action={{
+                          label: "필터 초기화",
+                          onClick: () => changeStatus(undefined),
+                        }}
+                      />
+                    ) : (
+                      <EmptyState
+                        icon={UsersIcon}
+                        title="등록된 계정이 없습니다"
+                        description="가맹점을 먼저 등록한 뒤 점주 계정을 발급하세요."
+                        action={
+                          isAdmin
+                            ? {
+                                label: "점주 계정 등록",
+                                onClick: () => setFormOpen(true),
+                                primary: true,
+                              }
+                            : undefined
+                        }
+                      />
+                    )}
                   </td>
                 </tr>
               ) : (
@@ -280,44 +303,3 @@ function SkeletonRows({ columns }: { columns: number }) {
   );
 }
 
-function EmptyState({
-  filtered,
-  onResetFilter,
-  onCreate,
-}: {
-  filtered: boolean;
-  onResetFilter: () => void;
-  onCreate?: () => void;
-}) {
-  return (
-    <div className="flex flex-col items-center gap-2 px-6 py-12 text-center">
-      <span className="text-[var(--core-color-neutral-300)]" aria-hidden>
-        <UsersIcon size={32} strokeWidth={1.5} />
-      </span>
-      <p className="text-heading text-fg-title">
-        {filtered ? "조건에 맞는 계정이 없습니다" : "등록된 계정이 없습니다"}
-      </p>
-      <p className="text-body-md text-fg-caption">
-        {filtered
-          ? "상태 필터를 바꾸거나 초기화해 보세요."
-          : "가맹점을 먼저 등록한 뒤 점주 계정을 발급하세요."}
-      </p>
-      {filtered ? (
-        <Button
-          variant="secondary"
-          size="lg"
-          className="mt-2"
-          onClick={onResetFilter}
-        >
-          필터 초기화
-        </Button>
-      ) : (
-        onCreate && (
-          <Button variant="primary" size="lg" className="mt-2" onClick={onCreate}>
-            점주 계정 등록
-          </Button>
-        )
-      )}
-    </div>
-  );
-}

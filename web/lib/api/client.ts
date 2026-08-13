@@ -48,6 +48,16 @@ interface RequestOptions {
   body?: unknown;
   headers?: Record<string, string>;
   signal?: AbortSignal;
+  /**
+   * 익명 API(로그인·재발급) — Authorization 헤더를 붙이지 않는다.
+   * 만료된 Bearer를 익명 요청에 실어 보내면 서버 필터가 그걸 먼저 검증해
+   * TOKEN_EXPIRED를 낼 수 있고, 재발급 요청이 자기 자신의 재발급을 기다리는
+   * 교착으로 이어질 수 있다.
+   */
+  anonymous?: boolean;
+  /** TOKEN_EXPIRED 자동 재발급·재시도를 끈다 — 본문에 리프레시 토큰을 담는 요청(로그아웃)은
+   * 재시도 시점에 이미 회전된 옛 토큰을 다시 보내게 되므로 호출부가 직접 처리한다 */
+  skipAuthRetry?: boolean;
 }
 
 function buildUrl(path: string, query?: QueryParams): string {
@@ -71,7 +81,7 @@ async function request<T>(
   // 호출자가 넘긴 headers 객체를 변형하지 않도록 복사본에만 쓴다
   const headers: Record<string, string> = { ...options.headers };
 
-  const token = accessTokenProvider?.() ?? null;
+  const token = options.anonymous ? null : (accessTokenProvider?.() ?? null);
   if (token) headers["Authorization"] = `Bearer ${token}`;
 
   let requestBody: BodyInit | undefined;
@@ -120,10 +130,15 @@ async function request<T>(
       response.status === 401 &&
       error.code === API_ERROR_CODES.TOKEN_EXPIRED &&
       tokenRefreshHandler &&
-      !isRetryAfterRefresh
+      !isRetryAfterRefresh &&
+      !options.skipAuthRetry
     ) {
       const renewedToken = await tokenRefreshHandler();
       if (renewedToken !== null) return request<T>(method, path, options, true);
+      // 재발급 실패의 후처리는 핸들러가 이미 했다 — 401(세션 종료)과 일시적
+      // 네트워크 오류(세션 유지)를 핸들러만 구분할 수 있으므로 여기서
+      // unauthorizedHandler로 세션을 또 정리하지 않는다.
+      throw error;
     }
     if (response.status === 401) unauthorizedHandler?.(error);
     throw error;
