@@ -64,6 +64,37 @@ class AuthFlowApiTest extends ApiIntegrationTest {
     }
 
     @Test
+    @DisplayName("로그인 응답에 소속 테넌트 요약이 포함된다 — 사이드바 테넌트명 표시용 (api-spec 2.4.2)")
+    void loginIncludesTenantSummary() throws Exception {
+        var setup = createTenantSetup("bonjuk");
+
+        mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                Map.of("email", setup.owner().getEmail(), "password", PASSWORD))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.tenant.id").value(setup.tenant().getId()))
+                .andExpect(jsonPath("$.data.tenant.name").value(setup.tenant().getName()))
+                // 같은 테넌트를 가리켜야 한다 — 웹이 둘을 섞어 써도 어긋나지 않게
+                .andExpect(jsonPath("$.data.user.tenantId").value(setup.tenant().getId()));
+    }
+
+    @Test
+    @DisplayName("SYSTEM 로그인은 소속 테넌트가 없어 tenant가 null (api-spec 2.4.2)")
+    void systemLoginHasNullTenant() throws Exception {
+        User system = createSystemAccount();
+
+        mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                Map.of("email", system.getEmail(), "password", PASSWORD))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.user.role").value("SYSTEM"))
+                .andExpect(jsonPath("$.data.tenant").doesNotExist())
+                .andExpect(jsonPath("$.data.user.tenantId").doesNotExist());
+    }
+
+    @Test
     @DisplayName("자격 증명 불일치는 원인 구분 없이 401 INVALID_CREDENTIALS")
     void invalidCredentials() throws Exception {
         var setup = createTenantSetup("bonjuk");
