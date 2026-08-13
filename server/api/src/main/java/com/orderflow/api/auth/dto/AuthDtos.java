@@ -1,5 +1,6 @@
 package com.orderflow.api.auth.dto;
 
+import com.orderflow.domain.iam.Tenant;
 import com.orderflow.domain.iam.User;
 import com.orderflow.domain.iam.UserRole;
 import jakarta.validation.constraints.Email;
@@ -28,7 +29,8 @@ public final class AuthDtos {
             long accessTokenExpiresIn,
             String refreshToken,
             boolean passwordSetupRequired,
-            UserSummary user) {
+            UserSummary user,
+            TenantSummary tenant) {
     }
 
     public record UserSummary(Long id, String email, String name, UserRole role, Long tenantId, Long storeId) {
@@ -36,6 +38,14 @@ public final class AuthDtos {
         public static UserSummary from(User user) {
             return new UserSummary(user.getId(), user.getEmail(), user.getName(),
                     user.getRole(), user.getTenantId(), user.getStoreId());
+        }
+    }
+
+    /** 소속 테넌트 — 웹 사이드바 테넌트명 표시용 (api-spec 2.4.2). SYSTEM 계정은 소속이 없어 null */
+    public record TenantSummary(Long id, String name) {
+
+        public static TenantSummary from(Tenant tenant) {
+            return tenant == null ? null : new TenantSummary(tenant.getId(), tenant.getName());
         }
     }
 

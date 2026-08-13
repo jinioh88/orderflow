@@ -2,6 +2,7 @@ package com.orderflow.api.auth;
 
 import com.orderflow.api.auth.dto.AuthDtos.LoginResponse;
 import com.orderflow.api.auth.dto.AuthDtos.PasswordSetupResponse;
+import com.orderflow.api.auth.dto.AuthDtos.TenantSummary;
 import com.orderflow.api.auth.dto.AuthDtos.TokenResponse;
 import com.orderflow.api.auth.dto.AuthDtos.UserSummary;
 import com.orderflow.api.auth.jwt.JwtTokenProvider;
@@ -45,14 +46,15 @@ public class AuthService {
             if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
                 throw new BusinessException(AuthErrorCode.INVALID_CREDENTIALS);
             }
-            assertLoginAllowed(user); // 403 ACCOUNT_INACTIVE
+            Tenant tenant = assertLoginAllowed(user); // 403 ACCOUNT_INACTIVE
 
             return new LoginResponse(
                     tokenProvider.createAccessToken(user),
                     tokenProvider.accessTtlSeconds(),
                     refreshTokenStore.issue(user.getId()),
                     user.requiresPasswordSetup(),
-                    UserSummary.from(user));
+                    UserSummary.from(user),
+                    TenantSummary.from(tenant));
         });
     }
 
@@ -102,13 +104,18 @@ public class AuthService {
                 false);
     }
 
-    /** 로그인 가드 — 계정·소속 가맹점·테넌트 중 하나라도 비활성/정지면 거부 (api-spec 2.4.2) */
-    private void assertLoginAllowed(User user) {
+    /**
+     * 로그인 가드 — 계정·소속 가맹점·테넌트 중 하나라도 비활성/정지면 거부 (api-spec 2.4.2).
+     * 검증에 쓴 테넌트를 그대로 돌려준다 — 로그인 응답의 테넌트명(2.4.2)에 재사용해 조회를 한 번만 한다.
+     * SYSTEM 계정은 소속 테넌트가 없어 null.
+     */
+    private Tenant assertLoginAllowed(User user) {
         if (!user.isActive()) {
             throw new BusinessException(AuthErrorCode.ACCOUNT_INACTIVE);
         }
+        Tenant tenant = null;
         if (user.getTenantId() != null) {
-            Tenant tenant = tenantRepository.findById(user.getTenantId()).orElse(null);
+            tenant = tenantRepository.findById(user.getTenantId()).orElse(null);
             if (tenant == null || !tenant.isActive()) {
                 throw new BusinessException(AuthErrorCode.ACCOUNT_INACTIVE);
             }
@@ -119,5 +126,6 @@ public class AuthService {
                 throw new BusinessException(AuthErrorCode.ACCOUNT_INACTIVE);
             }
         }
+        return tenant;
     }
 }
