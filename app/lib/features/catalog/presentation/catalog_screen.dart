@@ -137,19 +137,39 @@ class _ProductListState extends State<_ProductList> {
   @override
   void initState() {
     super.initState();
-    _scrollController.addListener(_onScroll);
+    _scrollController.addListener(_maybeLoadMore);
+    _scheduleFillCheck();
+  }
+
+  @override
+  void didUpdateWidget(_ProductList oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _scheduleFillCheck();
   }
 
   @override
   void dispose() {
-    _scrollController.removeListener(_onScroll);
+    _scrollController.removeListener(_maybeLoadMore);
     _scrollController.dispose();
     super.dispose();
   }
 
-  void _onScroll() {
+  /// 목록이 화면을 다 못 채웠는데 다음 페이지가 남은 경우를 프레임 뒤에 확인한다.
+  ///
+  /// 스크롤 이벤트만 기다리면 **스크롤할 수 없는 목록은 영영 다음 페이지를 못 받는다**
+  /// (검색 결과가 몇 건뿐이거나 화면이 큰 기기). 첫 프레임과 목록이 바뀔 때마다 확인한다.
+  void _scheduleFillCheck() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _maybeLoadMore();
+    });
+  }
+
+  void _maybeLoadMore() {
+    if (!_scrollController.hasClients) return;
     final position = _scrollController.position;
-    if (position.pixels >= position.maxScrollExtent - _preloadExtent) {
+    if (!position.hasContentDimensions) return;
+    // 스크롤이 아예 불가능한 경우(maxScrollExtent == 0)도 이 식에 포함된다.
+    if (position.maxScrollExtent - position.pixels <= _preloadExtent) {
       // 중복 호출 방어는 컨트롤러가 한다 (loadingMore·hasMore 확인).
       widget.onLoadMore();
     }
@@ -158,8 +178,9 @@ class _ProductListState extends State<_ProductList> {
   @override
   Widget build(BuildContext context) {
     final items = widget.state.items;
-    // 목록 끝의 진행 표시 한 칸.
-    final footerCount = widget.state.hasMore ? 1 : 0;
+    // 진행 표시는 **실제로 받아오는 중일 때만** 보여준다.
+    // `hasMore`만 보고 그리면 가만히 있는 목록 밑에 스피너가 상주한다.
+    final footerCount = widget.state.loadingMore ? 1 : 0;
 
     return ListView.separated(
       controller: _scrollController,

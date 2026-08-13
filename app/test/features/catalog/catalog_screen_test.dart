@@ -42,6 +42,21 @@ void main() {
     },
   };
 
+  /// 페이지 번호·총 페이지를 직접 지정하는 형태 (무한 스크롤 검증용).
+  Map<String, dynamic> pageOfWith(
+    List<Map<String, dynamic>> items, {
+    int number = 0,
+    required int totalPages,
+  }) => {
+    'items': items,
+    'page': {
+      'number': number,
+      'size': 20,
+      'totalElements': items.length * totalPages,
+      'totalPages': totalPages,
+    },
+  };
+
   /// 스켈레톤 셔머가 무한 반복이라 `pumpAndSettle`을 쓸 수 없다.
   /// 대신 몇 프레임을 직접 돌려 비동기 응답과 300ms 지연을 넘긴다.
   Future<void> settle(WidgetTester tester) async {
@@ -139,6 +154,47 @@ void main() {
     await settle(tester);
 
     expect(find.byType(ProductRowCard), findsOneWidget);
+  });
+
+  testWidgets('다음 페이지가 남아 있어도 받는 중이 아니면 스피너를 띄우지 않는다', (tester) async {
+    // 한 화면을 넘기는 분량이라 자동 이어받기가 걸리지 않는다 — 가만히 있는 상태다.
+    backend.stub(
+      '/products',
+      () => okBody(
+        pageOfWith(
+          [for (var i = 1; i <= 20; i++) productJson(i, name: '상품 $i')],
+          totalPages: 5,
+        ),
+      ),
+    );
+
+    await pumpCatalog(tester);
+
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+  });
+
+  testWidgets('첫 페이지가 화면을 못 채우면 스크롤 없이도 다음 페이지를 받는다', (tester) async {
+    // 스크롤이 불가능한 짧은 목록에서 스크롤 이벤트만 기다리면 영영 멈춰 있게 된다.
+    backend.on(
+      '/products',
+      (options, calls) => okBody(
+        calls == 1
+            ? pageOfWith([
+                productJson(1),
+                productJson(2),
+              ], number: 0, totalPages: 2)
+            : pageOfWith([
+                productJson(3),
+                productJson(4),
+              ], number: 1, totalPages: 2),
+      ),
+    );
+
+    await pumpCatalog(tester);
+    await settle(tester);
+
+    expect(backend.callsTo('/products'), 2);
+    expect(find.byType(ProductRowCard), findsNWidgets(4));
   });
 
   testWidgets('로드 실패는 에러 뷰 + 다시 시도 (02 §2.3)', (tester) async {
