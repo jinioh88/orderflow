@@ -13,6 +13,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -184,6 +185,46 @@ class AuthFlowApiTest extends ApiIntegrationTest {
         mockMvc.perform(get("/api/v1/stores").header(HttpHeaders.AUTHORIZATION, "Bearer " + expired))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.error.code").value("TOKEN_EXPIRED"));
+    }
+
+    /**
+     * 위조 토큰 거부 회귀 방지 (api-spec 1.2·1.4, NFR-2.1~2.4).
+     * 앱 세션이 "아무 문자열이나 Bearer로 붙이면 200"을 보고한 적이 있어(수정요청 20260813-app-bearer-token-not-verified)
+     * 서버에서는 재현되지 않았지만, 자동 검증이 비어 있던 지점이라 고정해 둔다.
+     * 뚫리면 토큰의 tenant_id를 신뢰할 수 없게 되어 테넌트 격리 자체가 성립하지 않는다.
+     */
+    @Test
+    @DisplayName("위조된 액세스 토큰은 401 UNAUTHORIZED — 아무 문자열도, 서명 변조도 통과하지 못한다 (api-spec 1.4)")
+    void forgedAccessTokenIsRejected() throws Exception {
+        var setup = createTenantSetup("bonjuk");
+
+        // ① JWT 형식조차 아닌 문자열
+        for (String garbage : List.of("x", "forged.token.value", "Bearer", "...")) {
+            mockMvc.perform(get("/api/v1/stores").header(HttpHeaders.AUTHORIZATION, "Bearer " + garbage))
+                    .andExpect(status().isUnauthorized())
+                    .andExpect(jsonPath("$.error.code").value("UNAUTHORIZED"));
+        }
+
+        // ② 페이로드는 유효하나 다른 키로 서명한 토큰 — 가장 현실적인 위조
+        String otherKeySigned = Jwts.builder()
+                .subject(String.valueOf(setup.admin().getId()))
+                .claim("tenant_id", setup.tenant().getId())
+                .claim("role", "HQ_ADMIN")
+                .expiration(new Date(System.currentTimeMillis() + 60_000))
+                .signWith(Keys.hmacShaKeyFor("another-secret-key-32bytes-or-more-long!!".getBytes(StandardCharsets.UTF_8)))
+                .compact();
+
+        mockMvc.perform(get("/api/v1/stores").header(HttpHeaders.AUTHORIZATION, "Bearer " + otherKeySigned))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error.code").value("UNAUTHORIZED"));
+
+        // ③ 정상 토큰의 서명부만 갈아끼운 경우
+        String valid = jsonAt(login(setup.admin().getEmail(), PASSWORD), "data.accessToken");
+        String tampered = valid.substring(0, valid.lastIndexOf('.')) + ".AAAAinvalidsignatureAAAA";
+
+        mockMvc.perform(get("/api/v1/stores").header(HttpHeaders.AUTHORIZATION, "Bearer " + tampered))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error.code").value("UNAUTHORIZED"));
     }
 
     @Test

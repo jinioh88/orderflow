@@ -98,20 +98,61 @@ OWNER2_TEMP_PW=$(call POST /api/v1/users \
   "$(jq -nc --argjson s "$STORE_ID" --arg e "$OWNER_TEMP_EMAIL" '{storeId:$s,email:$e,name:"임시비번점주"}')" \
   "$HQ_TOKEN" | jq -r '.data.temporaryPassword')
 
-# 카탈로그 — 목록이 비어 있으면 앱/웹 시연이 빈 화면이라 최소 표본을 넣는다.
-# 한정 품목 1건 포함 (US-ORD-06 재고 차감 시연 대비)
+# 카탈로그 — 앱 카탈로그 화면(US-CAT-01)·리뷰 게이트 CAT-A 검증에 필요한 최소 조건을 만족시킨다
+# (요청: 수정요청/20260813-app-seed-catalog-fixture.md).
+#
+#   상품 26건 — 판매중 23건이라 페이지 크기 20 기준 2페이지 → 무한 스크롤이 실제로 발생한다
+#   카테고리 4종 — 3.2.11은 3종만 반환한다 ("단종예정"은 판매중 상품이 없어 제외)
+#   한정 품목 3건 — 한정 뱃지·잔여 수량 표시 검증 (US-ORD-06 재고 차감 시연도 겸함)
+#   판매중지 3건 — 앱은 ON_SALE만 조회하므로 "제외가 실제로 되는지" 확인할 대상이 필요하다
+#
+# 품명 끝의 #NN은 검색 검증용이다 — "#0"으로 여러 건, "#07"로 한 건이 잡힌다.
 echo "▶ 카탈로그 표본 품목 등록"
-add_product() { # code name barcode category unit price
+add_product() { # code name barcode category unit price → 생성된 id
   call POST /api/v1/products \
     "$(jq -nc --arg c "$1" --arg n "$2" --arg b "$3" --arg g "$4" --arg u "$5" --argjson p "$6" \
        '{productCode:$c,name:$n,barcode:$b,category:$g,orderUnit:$u,unitPrice:$p}')" \
     "$HQ_TOKEN" | jq -r '.data.id'
 }
-add_product P001 "본죽 쌀 20kg"    8801111000011 "원재료" BOX 45000  >/dev/null
-add_product P002 "일회용 용기 500개" 8801111000028 "부자재" BOX 32000  >/dev/null
-LIMITED_ID=$(add_product P003 "한정 김치 5kg" 8801111000035 "원재료" EA 18000)
-# 한정 품목 지정 + 본사 가용 재고 설정 (스펙 3.2.6 / 3.2.8)
-call POST "/api/v1/products/$LIMITED_ID/limited" '{"availableQty":50}' "$HQ_TOKEN" >/dev/null
+
+# 형식: 품목코드|품명|바코드|카테고리|단위|단가|옵션
+#   옵션 — limited:<가용수량> = 한정 품목 지정(3.2.6+3.2.8) · suspended = 판매중지(3.2.5) · - = 없음
+while IFS='|' read -r code name barcode category unit price option; do
+  [[ -z ${code// /} || $code == \#* ]] && continue
+  id=$(add_product "$code" "$name" "$barcode" "$category" "$unit" "$price")
+  case "$option" in
+    limited:*) call POST "/api/v1/products/$id/limited" \
+                 "$(jq -nc --argjson q "${option#limited:}" '{availableQty:$q}')" "$HQ_TOKEN" >/dev/null ;;
+    suspended) call POST "/api/v1/products/$id/suspend" "" "$HQ_TOKEN" >/dev/null ;;
+  esac
+done <<'CATALOG'
+P001|쌀 20kg #01|8801111000001|원재료|BOX|45000|-
+P002|찹쌀 10kg #02|8801111000002|원재료|BOX|38000|-
+P003|멸치육수 5L #03|8801111000003|원재료|EA|12000|limited:50
+P004|다시마 1kg #04|8801111000004|원재료|EA|9000|-
+P005|건표고버섯 500g #05|8801111000005|원재료|EA|15000|-
+P006|국산 참깨 1kg #06|8801111000006|원재료|EA|22000|-
+P007|천일염 5kg #07|8801111000007|원재료|BOX|8000|-
+P008|다진 마늘 1kg #08|8801111000008|원재료|EA|11000|-
+P009|다진 생강 1kg #09|8801111000009|원재료|EA|10500|suspended
+P010|일회용 용기 500개 #10|8801111000010|부자재|BOX|32000|-
+P011|용기 뚜껑 500개 #11|8801111000011|부자재|BOX|18000|-
+P012|종이 포장백 1000매 #12|8801111000012|부자재|BOX|25000|-
+P013|나무 수저 1000개 #13|8801111000013|부자재|BOX|14000|-
+P014|물티슈 500매 #14|8801111000014|부자재|BOX|16000|-
+P015|비닐장갑 2000매 #15|8801111000015|부자재|BOX|9500|-
+P016|영수증 용지 50롤 #16|8801111000016|부자재|BOX|21000|-
+P017|배달 스티커 1000매 #17|8801111000017|부자재|BOX|7000|-
+P018|김치만두 1kg #18|8801111000018|냉동식품|BOX|13000|-
+P019|고기만두 1kg #19|8801111000019|냉동식품|BOX|13500|-
+P020|새우만두 1kg #20|8801111000020|냉동식품|BOX|16000|limited:30
+P021|떡갈비 1kg #21|8801111000021|냉동식품|BOX|24000|-
+P022|감자튀김 2kg #22|8801111000022|냉동식품|BOX|11000|-
+P023|냉동 대파 1kg #23|8801111000023|냉동식품|EA|6500|-
+P024|한정 김치 5kg #24|8801111000024|냉동식품|EA|18000|limited:20
+P025|구형 컵 300개 #25|8801111000025|단종예정|BOX|12000|suspended
+P026|구형 뚜껑 300개 #26|8801111000026|단종예정|BOX|6000|suspended
+CATALOG
 
 cat <<EOF
 
@@ -123,7 +164,12 @@ cat <<EOF
   STORE_OWNER   $OWNER_EMAIL        (SEED_PASSWORD)         확정 — 정상 로그인 시연
   STORE_OWNER   $OWNER_TEMP_EMAIL   $OWNER2_TEMP_PW              임시 — passwordSetupRequired=true 시연
 
-  카탈로그: 3건 (P001 쌀 / P002 용기 / P003 한정 김치 — 한정 품목, 가용 재고 50)
+  카탈로그: 26건 — 판매중 23건(페이지 크기 20 기준 2페이지) / 판매중지 3건
+    카테고리 4종: 원재료 · 부자재 · 냉동식품 · 단종예정
+      └ "단종예정"은 판매중 상품이 없어 GET /products/categories(3.2.11)에서 제외된다 → 3종 반환
+    한정 품목 3건: P003 멸치육수(50) · P020 새우만두(30) · P024 한정 김치(20)
+    판매중지 3건: P009 다진 생강 · P025 구형 컵 · P026 구형 뚜껑
+    품명 끝 #NN은 검색 검증용 ("#0" → 여러 건, "#07" → 한 건)
 
   ※ 임시 비밀번호는 등록 응답에서 1회만 노출된다 (스펙 2.4.9). 분실 시
      POST /api/v1/users/{userId}/temporary-password 로 재발급한다.
