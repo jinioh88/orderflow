@@ -23,6 +23,8 @@ const SESSION_KEY = "orderflow.auth.session";
 export interface SessionSnapshot {
   user: AuthUser;
   passwordSetupRequired: boolean;
+  /** 사이드바 표시용 테넌트명 (스펙 2.4.2 tenant.name). 구버전 스냅샷에는 없을 수 있다 */
+  tenantName?: string | null;
 }
 
 let accessToken: string | null = null;
