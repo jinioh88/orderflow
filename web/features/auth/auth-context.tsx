@@ -42,6 +42,8 @@ interface AuthState {
   user: AuthUser | null;
   role: Role | null;
   passwordSetupRequired: boolean;
+  /** 소속 테넌트명 (스펙 2.4.2) — 사이드바 로고 영역 표시용 */
+  tenantName: string | null;
 }
 
 interface AuthContextValue extends AuthState {
@@ -58,6 +60,7 @@ const UNAUTHENTICATED: AuthState = {
   user: null,
   role: null,
   passwordSetupRequired: false,
+  tenantName: null,
 };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -102,6 +105,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               user: snapshot.user,
               role: roleFromToken(snapshot.user.role),
               passwordSetupRequired: snapshot.passwordSetupRequired,
+              tenantName: snapshot.tenantName ?? null,
             }
           : UNAUTHENTICATED,
       );
@@ -126,12 +130,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     startSession(result, {
       user: result.user,
       passwordSetupRequired: result.passwordSetupRequired,
+      tenantName: result.tenant?.name ?? null,
     });
     setState({
       status: "authenticated",
       user: result.user,
       role: roleFromToken(result.user.role),
       passwordSetupRequired: result.passwordSetupRequired,
+      tenantName: result.tenant?.name ?? null,
     });
   }, []);
 

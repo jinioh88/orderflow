@@ -31,6 +31,12 @@ export interface LoginRequest {
   password: string;
 }
 
+/** 로그인 응답의 소속 테넌트 요약 (스펙 2.4.2, 수정요청 20260812 반영). id는 user.tenantId와 항상 동일 */
+export interface TenantSummary {
+  id: number;
+  name: string;
+}
+
 /** POST /auth/login 응답 (스펙 2.4.2) */
 export interface LoginResponse {
   accessToken: string;
@@ -38,6 +44,8 @@ export interface LoginResponse {
   refreshToken: string;
   passwordSetupRequired: boolean;
   user: AuthUser;
+  /** SYSTEM 로그인은 null */
+  tenant: TenantSummary | null;
 }
 
 /** POST /auth/refresh 응답 — 회전된 새 토큰 쌍 (스펙 2.4.3) */
