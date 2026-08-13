@@ -2,9 +2,12 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { ShieldAlert } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
-import { homePathFor, navItemOf } from "@/lib/design/nav";
+import { homePathFor, navItemOf, visibleNavItemsFor } from "@/lib/design/nav";
 import { useAuth } from "../auth-context";
+import { useLogout } from "../hooks/use-logout";
 
 /**
  * 라우트 가드 (US-AUTH-03). 인증 상태를 3개 구역으로 사상한다:
@@ -59,16 +62,49 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
 
+  // 볼 수 있는 메뉴가 하나도 없는 역할(점주 등이 웹에 로그인) — 리다이렉트할 홈이
+  // 없으므로 홈으로 보내면 무한 루프다. 안내 화면 + 로그아웃만 제공한다.
+  const noAccess = ready && visibleNavItemsFor(role).length === 0;
+
   // 역할 밖 메뉴로 직접 진입하면 홈으로 (메뉴 숨김만으로는 URL 입력을 못 막는다)
   const item = navItemOf(pathname);
   const roleAllowed = !item || (role !== null && item.roles.includes(role));
 
   useEffect(() => {
-    if (ready && !roleAllowed) router.replace(homePathFor(role));
-  }, [ready, roleAllowed, role, router]);
+    if (ready && !noAccess && !roleAllowed) router.replace(homePathFor(role));
+  }, [ready, noAccess, roleAllowed, role, router]);
 
+  if (noAccess) return <NoAccessScreen />;
   if (!ready || !roleAllowed) return <GuardPending />;
   return children;
+}
+
+/** 웹 관리자 화면 권한이 없는 역할용 안내 (색 단독 표현 금지 — 아이콘+문구) */
+function NoAccessScreen() {
+  const logout = useLogout();
+
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center gap-2 text-center">
+      <span className="text-danger-solid" aria-hidden>
+        <ShieldAlert size={32} strokeWidth={1.5} />
+      </span>
+      <p className="text-heading text-fg-title">
+        이 계정으로는 관리자 화면을 사용할 수 없습니다
+      </p>
+      <p className="text-body-md text-fg-caption">
+        본사 계정으로 다시 로그인해 주세요. 가맹점 발주는 모바일 앱에서 진행합니다.
+      </p>
+      <Button
+        variant="secondary"
+        size="lg"
+        className="mt-2"
+        loading={logout.isPending}
+        onClick={() => logout.mutate()}
+      >
+        로그아웃
+      </Button>
+    </div>
+  );
 }
 
 /** 로그인 화면 전용: 이미 로그인돼 있으면 상태에 맞는 구역으로 보낸다 */
