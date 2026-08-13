@@ -22,12 +22,12 @@ enum BadgeSize {
 class OrderStatusBadge extends StatelessWidget {
   /// 서버가 준 발주 상태.
   const OrderStatusBadge(this.status, {super.key, this.size = BadgeSize.md})
-      : _pendingSend = false;
+    : _pendingSend = false;
 
   /// 오프라인 큐에 쌓여 아직 전송되지 않은 로컬 발주 (US-ORD-07).
   const OrderStatusBadge.pendingSend({super.key, this.size = BadgeSize.md})
-      : status = null,
-        _pendingSend = true;
+    : status = null,
+      _pendingSend = true;
 
   final OrderStatus? status;
   final BadgeSize size;

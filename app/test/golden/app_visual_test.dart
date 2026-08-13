@@ -9,10 +9,18 @@ import 'package:app/core/widgets/bottom_cta_bar.dart';
 import 'package:app/core/widgets/order_status_badge.dart';
 import 'package:app/core/widgets/quantity_stepper.dart';
 import 'package:app/core/widgets/status_views.dart';
+import 'package:app/core/storage/key_value_store.dart';
+import 'package:app/features/auth/application/login_controller.dart';
+import 'package:app/features/auth/application/submit_state.dart';
 import 'package:app/features/auth/presentation/login_screen.dart';
+import 'package:app/features/auth/presentation/password_setup_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../helpers/fake_backend.dart';
 
 /// 골든 테스트 — `styleguide-app.html`과 눈으로 대조하기 위한 렌더 결과물이자,
 /// 이후 디자인 시스템 변경이 화면을 조용히 망가뜨리는 것을 잡는 회귀 테스트다.
@@ -36,12 +44,20 @@ void main() {
     }
   });
 
-  Future<void> pumpPhone(WidgetTester tester, Widget child) async {
+  Future<void> pumpPhone(
+    WidgetTester tester,
+    Widget child, {
+    List<Override> overrides = const [],
+  }) async {
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
     await tester.pumpWidget(
-      MaterialApp(theme: AppTheme.light(), home: child),
+      // 로그인 화면은 Riverpod 컨트롤러(제출 상태)를 구독한다 — 실제 앱과 같은 배선으로 렌더한다.
+      ProviderScope(
+        overrides: overrides,
+        child: MaterialApp(theme: AppTheme.light(), home: child),
+      ),
     );
     // 스켈레톤 셔머는 무한 반복이라 pumpAndSettle이 끝나지 않는다.
     // 로딩 지연(300ms)을 넘긴 시점의 한 프레임만 찍는다.
@@ -54,6 +70,38 @@ void main() {
     await expectLater(
       find.byType(LoginScreen),
       matchesGoldenFile('goldens/login_screen.png'),
+    );
+  });
+
+  testWidgets('로그인 화면 — 로그인 실패 배너', (tester) async {
+    await pumpPhone(
+      tester,
+      const LoginScreen(),
+      overrides: [
+        loginControllerProvider.overrideWith(_FailedLoginController.new),
+      ],
+    );
+    await expectLater(
+      find.byType(LoginScreen),
+      matchesGoldenFile('goldens/login_screen_error.png'),
+    );
+  });
+
+  testWidgets('비밀번호 설정 화면 (최초 로그인)', (tester) async {
+    await pumpPhone(
+      tester,
+      const PasswordSetupScreen(),
+      overrides: [
+        keyValueStoreProvider.overrideWithValue(
+          InMemoryKeyValueStore({
+            'auth.session': storedSessionJson(passwordSetupRequired: true),
+          }),
+        ),
+      ],
+    );
+    await expectLater(
+      find.byType(PasswordSetupScreen),
+      matchesGoldenFile('goldens/password_setup_screen.png'),
     );
   });
 
@@ -137,7 +185,8 @@ Future<void> _loadFont(String family, String path) async {
 
 /// Flutter SDK 캐시의 Material 아이콘 폰트를 찾는다.
 File? _materialIconsFile() {
-  final flutterRoot = Platform.environment['FLUTTER_ROOT'] ??
+  final flutterRoot =
+      Platform.environment['FLUTTER_ROOT'] ??
       // `flutter test`는 SDK의 dart를 쓰므로 실행 중인 Dart의 위치로 SDK를 역산한다.
       Directory(Platform.resolvedExecutable).parent.parent.parent.parent.path;
   final file = File(
@@ -221,20 +270,13 @@ class _ComponentGalleryState extends State<_ComponentGallery> {
             spacing: AppSpace.sm,
             runSpacing: AppSpace.sm,
             children: [
-              for (final status in OrderStatus.values)
-                OrderStatusBadge(status),
+              for (final status in OrderStatus.values) OrderStatusBadge(status),
               const OrderStatusBadge.pendingSend(),
-              const OrderStatusBadge(
-                OrderStatus.approved,
-                size: BadgeSize.lg,
-              ),
+              const OrderStatusBadge(OrderStatus.approved, size: BadgeSize.lg),
             ],
           ),
           const SizedBox(height: AppSpace.lg),
-          const AppTextField(
-            label: '이메일',
-            hint: 'name@company.com',
-          ),
+          const AppTextField(label: '이메일', hint: 'name@company.com'),
           const SizedBox(height: AppSpace.md),
           const AppTextField(
             label: '수량',
@@ -248,4 +290,11 @@ class _ComponentGalleryState extends State<_ComponentGallery> {
       ),
     );
   }
+}
+
+/// 로그인 실패 상태를 고정으로 그리는 컨트롤러 (골든 전용).
+class _FailedLoginController extends LoginController {
+  @override
+  SubmitState build() =>
+      const SubmitState(errorMessage: '이메일 또는 비밀번호가 올바르지 않습니다');
 }

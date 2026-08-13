@@ -76,22 +76,20 @@ class AppButton extends StatelessWidget {
 
     final (Color bg, Color fg, BorderSide? side) = switch (_variant) {
       _Variant.cta || _Variant.primary => (
-          enabled ? AppColors.primary : AppColors.surfaceMuted,
-          enabled ? AppColors.textOnPrimary : AppColors.textDisabled,
-          null,
-        ),
+        enabled ? AppColors.primary : AppColors.surfaceMuted,
+        enabled ? AppColors.textOnPrimary : AppColors.textDisabled,
+        null,
+      ),
       _Variant.secondary => (
-          AppColors.surface,
-          enabled ? AppColors.textBody : AppColors.textDisabled,
-          BorderSide(
-            color: enabled ? AppColors.borderStrong : AppColors.border,
-          ),
-        ),
+        AppColors.surface,
+        enabled ? AppColors.textBody : AppColors.textDisabled,
+        BorderSide(color: enabled ? AppColors.borderStrong : AppColors.border),
+      ),
       _Variant.danger => (
-          enabled ? AppFeedback.danger.solid : AppColors.surfaceMuted,
-          enabled ? AppColors.textOnPrimary : AppColors.textDisabled,
-          null,
-        ),
+        enabled ? AppFeedback.danger.solid : AppColors.surfaceMuted,
+        enabled ? AppColors.textOnPrimary : AppColors.textDisabled,
+        null,
+      ),
     };
 
     return SizedBox(
@@ -172,10 +170,7 @@ class AppTextButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       height: AppTouch.minTarget,
-      child: TextButton(
-        onPressed: onPressed,
-        child: Text(label),
-      ),
+      child: TextButton(onPressed: onPressed, child: Text(label)),
     );
   }
 }

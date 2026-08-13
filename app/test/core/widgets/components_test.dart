@@ -8,9 +8,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Widget wrap(Widget child) => MaterialApp(
-      theme: AppTheme.light(),
-      home: Scaffold(body: Center(child: child)),
-    );
+  theme: AppTheme.light(),
+  home: Scaffold(body: Center(child: child)),
+);
 
 void main() {
   group('상태 뱃지 — 위젯 1개가 7상태 + 전송 대기를 커버한다 (04 §8)', () {
@@ -63,10 +63,14 @@ void main() {
         ),
       );
 
-      expect(tester.getSize(find.byType(AppButton).first).height,
-          AppTouch.ctaHeight);
       expect(
-          tester.getSize(find.byType(AppButton).last).height, AppTouch.minTarget);
+        tester.getSize(find.byType(AppButton).first).height,
+        AppTouch.ctaHeight,
+      );
+      expect(
+        tester.getSize(find.byType(AppButton).last).height,
+        AppTouch.minTarget,
+      );
     });
 
     testWidgets('로딩 중에는 라벨을 유지하고 폭이 변하지 않으며 눌리지 않는다', (tester) async {
@@ -188,11 +192,7 @@ void main() {
       var value = 5;
       await tester.pumpWidget(
         wrap(
-          QuantityStepper(
-            value: 5,
-            maxValue: 5,
-            onChanged: (v) => value = v,
-          ),
+          QuantityStepper(value: 5, maxValue: 5, onChanged: (v) => value = v),
         ),
       );
 
@@ -228,8 +228,11 @@ void main() {
 
       await tester.enterText(find.byType(TextFormField).first, '틀린값');
       await tester.pump();
-      expect(find.text('이메일 형식이 아닙니다'), findsNothing,
-          reason: '입력이 끝나기 전에 혼내지 않는다');
+      expect(
+        find.text('이메일 형식이 아닙니다'),
+        findsNothing,
+        reason: '입력이 끝나기 전에 혼내지 않는다',
+      );
 
       // 다른 필드로 포커스를 옮겨 블러 발생.
       await tester.tap(find.byType(TextFormField).last);

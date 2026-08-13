@@ -36,8 +36,11 @@ void main() {
   }
 
   test('tokens.json 파일이 존재한다', () {
-    expect(tokensFile.existsSync(), isTrue,
-        reason: '디자인 시스템 경로가 바뀌었다면 이 테스트 경로도 고쳐야 한다');
+    expect(
+      tokensFile.existsSync(),
+      isTrue,
+      reason: '디자인 시스템 경로가 바뀌었다면 이 테스트 경로도 고쳐야 한다',
+    );
   });
 
   group('app.color', () {
@@ -127,8 +130,11 @@ void main() {
         expect(style.height, (json['lineHeight'] as num) / size);
         expect(style.fontWeight?.value, json['weight']);
         if (json['tabularNums'] == true) {
-          expect(style.fontFeatures, contains(const FontFeature.tabularFigures()),
-              reason: '숫자가 정렬되는 스타일은 tabular figures를 켠다');
+          expect(
+            style.fontFeatures,
+            contains(const FontFeature.tabularFigures()),
+            reason: '숫자가 정렬되는 스타일은 tabular figures를 켠다',
+          );
         }
       });
     });
@@ -145,19 +151,16 @@ void main() {
       final spacing = (section(['app'])['spacing'] as List)
           .map((v) => (v as num).toDouble())
           .toList();
-      expect(
-        [
-          AppSpace.xs,
-          AppSpace.sm,
-          AppSpace.md,
-          AppSpace.lg,
-          AppSpace.xl,
-          AppSpace.xxl,
-          AppSpace.xxxl,
-          AppSpace.huge,
-        ],
-        spacing,
-      );
+      expect([
+        AppSpace.xs,
+        AppSpace.sm,
+        AppSpace.md,
+        AppSpace.lg,
+        AppSpace.xl,
+        AppSpace.xxl,
+        AppSpace.xxxl,
+        AppSpace.huge,
+      ], spacing);
     });
 
     test('app.radius', () {

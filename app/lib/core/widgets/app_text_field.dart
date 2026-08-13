@@ -150,16 +150,14 @@ class _AppTextFieldState extends State<AppTextField> {
           autovalidateMode: AutovalidateMode.disabled,
           textAlign: widget.numeric ? TextAlign.right : TextAlign.start,
           style: widget.numeric
-              ? AppText.tabular(AppText.body).copyWith(
-                  color: AppColors.textBody,
-                )
+              ? AppText.tabular(
+                  AppText.body,
+                ).copyWith(color: AppColors.textBody)
               : AppText.body.copyWith(color: AppColors.textBody),
           decoration: InputDecoration(
             hintText: widget.hint,
             helperText: widget.helperText,
-            helperStyle: AppText.caption.copyWith(
-              color: AppColors.textCaption,
-            ),
+            helperStyle: AppText.caption.copyWith(color: AppColors.textCaption),
             // `suffixText`는 포커스·입력 값이 있을 때만 그려진다. 단위는 빈 입력에서도
             // 항상 보여야 하므로(02-patterns §3) 직접 위젯으로 붙인다.
             suffixIcon: widget.unitSuffix == null

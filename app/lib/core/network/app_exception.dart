@@ -47,9 +47,9 @@ final class FieldError {
   const FieldError({required this.field, required this.reason});
 
   factory FieldError.fromJson(Map<String, dynamic> json) => FieldError(
-        field: json['field'] as String? ?? '',
-        reason: json['reason'] as String? ?? '',
-      );
+    field: json['field'] as String? ?? '',
+    reason: json['reason'] as String? ?? '',
+  );
 
   final String field;
   final String reason;

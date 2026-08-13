@@ -128,14 +128,24 @@ abstract final class AppColors {
 /// 라벨은 토큰의 `label` 값을 그대로 쓴다 — 화면마다 다른 표현 금지(02-patterns §1).
 enum OrderStatus {
   submitted('SUBMITTED', '제출됨', _Core.blue600, _Core.blue700, _Core.blue50),
-  pendingApproval('PENDING_APPROVAL', '승인 대기', _Core.amber600, _Core.amber700,
-      _Core.amber50),
+  pendingApproval(
+    'PENDING_APPROVAL',
+    '승인 대기',
+    _Core.amber600,
+    _Core.amber700,
+    _Core.amber50,
+  ),
   approved('APPROVED', '승인됨', _Core.green600, _Core.green700, _Core.green50),
   rejected('REJECTED', '거절됨', _Core.red600, _Core.red700, _Core.red50),
   shipped('SHIPPED', '출하됨', _Core.violet600, _Core.violet700, _Core.violet50),
   received('RECEIVED', '입고 완료', _Core.teal600, _Core.teal700, _Core.teal50),
   canceled(
-      'CANCELED', '취소됨', _Core.neutral400, _Core.neutral600, _Core.neutral100);
+    'CANCELED',
+    '취소됨',
+    _Core.neutral400,
+    _Core.neutral600,
+    _Core.neutral100,
+  );
 
   const OrderStatus(this.code, this.label, this.dot, this.text, this.bg);
 

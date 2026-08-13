@@ -50,7 +50,8 @@ void main() {
     expect(
       offenders,
       isEmpty,
-      reason: 'hex 대신 tokens.dart의 토큰 이름을 쓴다 (01-foundations §0):\n'
+      reason:
+          'hex 대신 tokens.dart의 토큰 이름을 쓴다 (01-foundations §0):\n'
           '${offenders.join('\n')}',
     );
   });
@@ -73,7 +74,8 @@ void main() {
     expect(
       offenders,
       isEmpty,
-      reason: 'Material 기본 팔레트 대신 AppColors/AppFeedback을 쓴다:\n'
+      reason:
+          'Material 기본 팔레트 대신 AppColors/AppFeedback을 쓴다:\n'
           '${offenders.join('\n')}',
     );
   });
@@ -99,7 +101,8 @@ void main() {
     expect(
       offenders,
       isEmpty,
-      reason: '본문 크기 오렌지는 AppColors.primaryStrong을 쓰고, 오렌지 면이 필요하면 '
+      reason:
+          '본문 크기 오렌지는 AppColors.primaryStrong을 쓰고, 오렌지 면이 필요하면 '
           'AppButton 등 캡슐화된 위젯을 쓴다 (04 §2):\n${offenders.join('\n')}',
     );
   });
